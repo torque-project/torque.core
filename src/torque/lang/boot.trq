@@ -1,0 +1,47 @@
+(ns torque.lang.boot
+  (:use
+    [torque.lang.protocols]))
+
+(def identical?
+  (fn* [x y] (torque.core.builtin/identical? x y)))
+
+(def satisfies?
+  (fn* [x y] (torque.core.builtin/satisfies? x y)))
+
+(def =
+  (fn* [a b]
+    (if (identical? a b)
+      true
+      (if (satisfies? IEquiv a)
+        (-equiv a b)
+        false))))
+
+(def nil?
+  (fn* [x] (identical? x nil)))
+
+(def not
+  (fn* [x] (if x false true)))
+
+(def inc
+  (fn* [x] (torque.core.builtin/+ x 1)))
+
+(def seq
+  (fn* [x] (if x (-seq x) nil)))
+
+;; a preliminary concat version to get us to syntax quote support
+
+;; (def concat
+;;   (fn*
+;;     ([] nil)
+;;     ([x] x)
+;;     ([x y]
+;;      (let* [s (seq x)]
+;;        (if s
+;;          (-conj (-first s) (concat (-rest s) y))
+;;          y)))
+;;     ([x y & zs]
+;;      (loop* [out (concat x y)
+;;              zs  (seq zs)]
+;;        (if zs
+;;          (recur (concat out (-first zs)) (-next zs))
+;;          out)))))

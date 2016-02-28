@@ -1,0 +1,81 @@
+(ns torque.lang.list
+  (:use
+    [torque.lang.protocols]
+    [torque.lang.boot]))
+
+(deftype List [meta first rest count]
+
+  ;; tag protocol to hide the fact that there
+  ;; are different types that act as lists
+  AList
+
+  ;; IPrintable
+  ;; (-str [this]
+  ;;   (seq/pr-str "(" ")" this))
+
+  ICloneable
+  (-clone [_]
+    (new List meta first rest count))
+
+  IWithMeta
+  (-with-meta [o meta]
+    (new List meta first rest count))
+
+  IMeta
+  (-meta [o] meta)
+
+  ISeq
+  (-first [_]
+    first)
+  (-rest  [_]
+    (if (= count 1)
+      ()
+      rest))
+
+  INext
+  (-next [_]
+    (if (= count 1)
+      nil
+      rest))
+
+  IStack
+  (-peek [_]
+    first)
+  (-pop [coll]
+    (-rest coll))
+
+  ICollection
+  (-conj [coll o]
+    (new List meta o coll (inc count)))
+
+  ;; IEquiv
+  ;; (-equiv [o other]
+  ;;   (seq/equiv o other))
+
+  ISeqable
+  (-seq [o] o)
+
+  ICounted
+  (-count [_] count)
+
+  ;; IReduce
+  ;; (-reduce [coll f init]
+  ;;   (seq/reduce f init coll))
+  )
+
+(def empty-list
+  (fn* []
+    (new List nil nil nil 0)))
+
+(def ^:private reverse
+  (fn* [args]
+    (loop* [out (empty-list)
+            xs  args]
+      (if (not (nil? xs))
+        (recur (-conj out (-first xs))
+               (-next xs))
+        out))))
+
+(def list
+  (fn* [& args]
+    (reverse (reverse args))))

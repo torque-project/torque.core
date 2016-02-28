@@ -1,0 +1,173 @@
+(ns torque.lang.protocols)
+
+(defprotocol IPrintable
+  (-str [this]))
+
+(defprotocol ICloneable
+  (-clone [value]))
+
+(defprotocol ICounted
+  (-count [coll]))
+
+(defprotocol IEmptyableCollection
+  (-empty [coll]))
+
+(defprotocol ICollection
+  (-conj [coll o]))
+
+(defprotocol IIndexed
+  (-nth [coll n] [coll n not-found]))
+
+(defprotocol ISeq
+  (-first [this])
+  (-rest [this]))
+
+(defprotocol INext
+  (-next [coll]))
+
+(defprotocol ILookup
+  (-lookup [o k] [o k not-found]))
+
+(defprotocol IAssociative
+  (-contains-key? [coll k])
+  (-assoc [coll k v]))
+
+(defprotocol IMap
+  (-dissoc [coll k]))
+
+(defprotocol IMapEntry
+  (-key [coll])
+  (-val [coll]))
+
+(defprotocol ISet
+  (-disjoin [coll v]))
+
+(defprotocol IStack
+  (-peek [coll])
+  (-pop [coll]))
+
+(defprotocol IVector
+  (-assoc-n [coll n val]))
+
+(defprotocol IDeref
+ (-deref [o]))
+
+(defprotocol IDerefWithTimeout
+  (-deref-with-timeout [o msec timeout-val]))
+
+(defprotocol IMeta
+  (-meta [o]))
+
+(defprotocol IWithMeta
+  (-with-meta [o meta]))
+
+(defprotocol IReduce
+  (-reduce [coll f] [coll f init]))
+
+(defprotocol IKVReduce
+  (-kv-reduce [coll f init]))
+
+(defprotocol IEquiv
+  (-equiv [o other]))
+
+(defprotocol IHash
+  (-hash [o]))
+
+(defprotocol ISeqable
+  (-seq [o]))
+
+(defprotocol IReversible
+  (-rseq [coll]))
+
+(defprotocol ISorted
+  (-sorted-seq [coll ascending?])
+  (-sorted-seq-from [coll k ascending?])
+  (-entry-key [coll entry])
+  (-comparator [coll]))
+
+(defprotocol IPending
+  (-realized? [d]))
+
+(defprotocol IWatchable
+  (-notify-watches [this oldval newval])
+  (-add-watch [this key f])
+  (-remove-watch [this key]))
+
+(defprotocol IEditableCollection
+  (-as-transient [coll]))
+
+(defprotocol ITransientCollection
+  (-conj! [tcoll val])
+  (-persistent! [tcoll]))
+
+(defprotocol ITransientAssociative
+  (-assoc! [tcoll key val]))
+
+(defprotocol ITransientMap
+  (-dissoc! [tcoll key]))
+
+(defprotocol ITransientVector
+  (-assoc-n! [tcoll n val])
+  (-pop! [tcoll]))
+
+(defprotocol ITransientSet
+  (-disjoin! [tcoll v]))
+
+(defprotocol IComparable
+  (-compare [x y]))
+
+(defprotocol IChunk
+  (-drop-first [coll]))
+
+(defprotocol IChunkedSeq
+  (-chunked-first [coll])
+  (-chunked-rest [coll]))
+
+(defprotocol IChunkedNext
+  (-chunked-next [coll]))
+
+(defprotocol INamed
+  (-name [x])
+  (-namespace [x]))
+
+(defprotocol IReset
+  (-reset! [o new-value]))
+
+(defprotocol ISwap
+  (-swap! [o f] [o f a] [o f a b] [o f a b xs]))
+
+(defprotocol IVolatileg
+  (-vreset! [o new-value]))
+
+(defprotocol AList)
+
+(defprotocol IFn
+  (-invoke
+    [this]
+    [this a]
+    [this a b]
+    [this a b c]
+    [this a b c d]
+    [this a b c d e]
+    [this a b c d e f]
+    [this a b c d e f g]
+    [this a b c d e f g h]
+    [this a b c d e f g h i]
+    [this a b c d e f g h i j]
+    [this a b c d e f g h i j k]
+    [this a b c d e f g h i j k l]
+    [this a b c d e f g h i j k l m]
+    [this a b c d e f g h i j k l m n]
+    [this a b c d e f g h i j k l m n o]
+    [this a b c d e f g h i j k l m n o p]
+    [this a b c d e f g h i j k l m n o p q]
+    [this a b c d e f g h i j k l m n o p q r]
+    [this a b c d e f g h i j k l m n o p q r s]
+    [this a b c d e f g h i j k l m n o p q r s t]
+    [this a b c d e f g h i j k l m n o p q r s t rest]))
+
+(defprotocol IString)
+;; TODO: add common string operations
+
+;; marker protocol for defrecord
+(defprotocol IRecord)

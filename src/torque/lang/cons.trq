@@ -1,0 +1,64 @@
+ ;   Copyright (c) Rich Hickey. All rights reserved.
+ ;   The use and distribution terms for this software are covered by the
+ ;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+ ;   which can be found in the file epl-v10.html at the root of this distribution.
+ ;   By using this software in any fashion, you are agreeing to be bound by
+ ;   the terms of this license.
+ ;   You must not remove this notice, or any other, from this software.
+
+(ns torque.lang.cons
+  (:use
+   [torque.lang.protocols]
+   [torque.lang.boot]))
+
+(deftype Cons [first rest]
+
+  ;; IPrintable
+  ;; (-str [this]
+  ;;   (seq/pr-str "(" ")" this))
+
+  AList
+
+  ICloneable
+  (-clone [_]
+    (new Cons first rest))
+
+  ISeq
+  (-first [_]
+    first)
+  (-rest [_]
+    (if (nil? rest)
+      ()
+      rest))
+
+  INext
+  (-next [coll]
+    (if (nil? rest)
+      nil
+      (seq rest)))
+
+  ICollection
+  (-conj [coll o]
+    (new Cons o coll))
+
+  ;; IEquiv
+  ;; (-equiv [o other]
+  ;;   (seq/equiv o other))
+
+  ISeqable
+  (-seq [o] o)
+
+  ;; IReduce
+  ;; (-reduce [coll f]
+  ;;   (seq/reduce f coll))
+  ;; (-reduce [coll f init]
+  ;;   (seq/reduce f init coll))
+  )
+
+(def cons
+  (fn* [x coll]
+    (if (nil? coll)
+      (new Cons x coll)
+      (if (satisfies? ISeq coll)
+        (new Cons x coll)
+        (new Cons x (seq coll))))))
