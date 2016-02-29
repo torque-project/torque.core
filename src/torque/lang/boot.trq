@@ -1,3 +1,5 @@
+;; -*- mode: clojure;-*-
+
 (ns torque.lang.boot
   (:use
     [torque.lang.protocols]))
@@ -47,3 +49,4 @@
         (-meta o)
         nil)
       nil)))
+

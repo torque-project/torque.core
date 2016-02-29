@@ -1,0 +1,37 @@
+;; -*- mode: clojure;-*-
+
+(ns torque.lang.seq
+  (:use
+    [torque.lang.protocols]
+    [torque.lang.boot]))
+
+(defn first [s]
+  (when-not (nil? s)
+    (if (satisfies? ISeq s)
+      (-first s)
+      (when-let [s (seq s)]
+        (-first s)))))
+
+(defn rest [s]
+  (when-not (nil? s)
+    (if (satisfies? ISeq s)
+      (-rest s)
+      (if-let [s (seq s)]
+        (-rest s)
+        ())
+      ())))
+
+(defn next [s]
+  (when-not (nil? s)
+    (if (satisfies? INext s)
+      (-next s)
+      (seq (rest s)))))
+
+(defn second [s]
+  (first (next s)))
+
+(defn ffirst [s]
+  (first (first s)))
+
+(defn nnext [s]
+  (next (next s)))

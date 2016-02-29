@@ -1,9 +1,13 @@
+;; -*- mode: clojure;-*-
+
 (ns torque.core
   (:inherit
-   [torque.lang.protocols]
-   [torque.lang.boot]
-   [torque.lang.cons]
-   [torque.lang.list]
-   [torque.lang.flow]
-   [torque.lang.defn]
-   [torque.lang.lazy]))
+    [torque.lang.protocols]
+    [torque.lang.boot]
+    [torque.lang.cons]
+    [torque.lang.list]
+    [torque.lang.flow]
+    [torque.lang.defn]
+    [torque.lang.let]
+    [torque.lang.lazy]
+    [torque.lang.seq]))

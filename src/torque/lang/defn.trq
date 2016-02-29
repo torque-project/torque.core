@@ -1,3 +1,5 @@
+;; -*- mode: clojure;-*-
+
 (ns torque.lang.defn
   (:use
     [torque.lang.protocols]
@@ -16,4 +18,3 @@
     ;; function definition
     (list 'def name (cons 'fn fdecl))))
 
-;; -*- mode: clojure;-*-

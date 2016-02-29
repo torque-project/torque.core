@@ -1,3 +1,5 @@
+;; -*- mode: clojure;-*-
+
 (ns torque.lang.list
   (:use
     [torque.lang.protocols]
@@ -79,3 +81,4 @@
 (def list
   (fn* [& args]
     (reverse (reverse args))))
+

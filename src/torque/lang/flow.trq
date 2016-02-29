@@ -1,3 +1,5 @@
+;; -*- mode: clojure;-*-
+
 (ns torque.lang.flow
   (:use
     [torque.lang.boot]
@@ -15,3 +17,4 @@
 (def ^:macro if-not
   (fn* [test then else]
     (list 'if test else then)))
+

@@ -1,0 +1,26 @@
+;; -*- mode: clojure;-*-
+
+(ns torque.lang.let
+  (:use
+    [torque.lang.protocols]
+    [torque.lang.boot]
+    [torque.lang.list]
+    [torque.lang.cons]))
+
+(def ^:macro let
+  (fn* [& forms]
+    (cons 'let* forms)))
+
+(def ^:macro when-let
+  (fn* [binding & body]
+    (list 'let [(-nth binding 0) (-nth binding 1)]
+          (list 'if (-nth binding 0)
+                (cons 'do body)
+                nil))))
+
+(def ^:macro if-let
+  (fn* [binding then else]
+    (list 'let [(-nth binding 0) (-nth binding 1)]
+          (list 'if (-nth binding 0)
+                then
+                else))))
