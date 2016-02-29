@@ -6,20 +6,20 @@
 ;   the terms of this license.
 ;   You must not remove this notice, or any other, from this software.
 
-(ns clojure.rt.lazy
+(ns torque.lang.lazy
   (:use
     [torque.lang.protocols]
     [torque.lang.boot]))
 
 (def sval
   (fn* [ls]
-    (let [f (. ls fn)]
+    (let* [f (. ls fn)]
       (when f
-        (set! (. ls s)  (f))
-        (set! (. ls fn) nil)
-        (. ls -s)))))
+        (set! ls s  (f))
+        (set! ls fn nil)
+        (. ls s)))))
 
-(deftype LazySeq [fn s]
+(deftype LazySeq [^:mutable fn ^:mutable s]
 
   ;; IPrintable
   ;; (-str [this]
@@ -29,29 +29,30 @@
   (-first [this]
     (-seq this)
     (when-not (nil? s)
-      (first s)))
+      (-first s)))
   (-rest [this]
     (-seq this)
     (if-not (nil? s)
-      (rest s)
+      (-rest s)
       ()))
 
   INext
   (-next [coll]
     (-seq coll)
     (when-not (nil? s)
-      (next s)))
+      (-next s)))
 
   ISeqable
   (-seq [o]
     (sval o)
     (when-not (nil? s)
-      (loop [ls s]
+      (loop* [ls s]
         (if (instance? LazySeq ls)
           (recur (sval ls))
           (do
-            (set! (. o -s) ls)
-            (-seq s)))))))
+            (set! o s ls)
+            (seq s)))))))
 
-;; (defmacro lazy-seq [& body]
-;;   (list 'new 'LazySeq (list 'fn '[] body) 'nil))
+(def ^:macro lazy-seq
+  (fn* [& body]
+    (list 'new 'LazySeq (list 'fn* '[] (cons 'do body)) 'nil)))

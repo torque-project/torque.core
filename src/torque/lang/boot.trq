@@ -8,6 +8,12 @@
 (def satisfies?
   (fn* [x y] (torque.core.builtin/satisfies? x y)))
 
+(def type
+  (fn* [x] (torque.core.builtin/type x)))
+
+(def instance?
+  (fn* [t x] (identical? (type x) t)))
+
 (def =
   (fn* [a b]
     (if (identical? a b)

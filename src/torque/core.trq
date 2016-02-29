@@ -5,6 +5,4 @@
    [torque.lang.cons]
    [torque.lang.list]
    [torque.lang.flow]
-    ;; [torque.lang.lazy]
-    ;; [torque.lang.cons]
-    ))
+   [torque.lang.lazy]))
