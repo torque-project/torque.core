@@ -34,20 +34,16 @@
 (def seq
   (fn* [x] (if x (-seq x) nil)))
 
-;; a preliminary concat version to get us to syntax quote support
+(def with-meta
+  (fn* [o meta]
+    (if (not (nil? o))
+      (-with-meta o meta)
+      nil)))
 
-;; (def concat
-;;   (fn*
-;;     ([] nil)
-;;     ([x] x)
-;;     ([x y]
-;;      (let* [s (seq x)]
-;;        (if s
-;;          (-conj (-first s) (concat (-rest s) y))
-;;          y)))
-;;     ([x y & zs]
-;;      (loop* [out (concat x y)
-;;              zs  (seq zs)]
-;;        (if zs
-;;          (recur (concat out (-first zs)) (-next zs))
-;;          out)))))
+(def meta
+  (fn* [o]
+    (if (not (nil? o))
+      (if (satisfies? IMeta o)
+        (-meta o)
+        nil)
+      nil)))
