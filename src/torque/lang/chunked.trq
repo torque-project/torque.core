@@ -12,7 +12,58 @@
     [torque.lang.protocols]
     [torque.lang.boot]
     [torque.lang.let]
-    [torque.lang.seq]))
+    [torque.lang.def]
+    [torque.lang.seq]
+    [torque.lang.common.node]))
+
+(declare chunked-seq)
+
+(deftype ChunkedSeq [vec node i off]
+
+  ;; IPrintable
+  ;; (-str [o] "chunkedseq")
+
+  ISeqable
+  (-seq [o] o)
+
+  ;; IEquiv
+  ;; (-equiv [o other] (seq/equiv o other))
+
+  ISeq
+  (-first [this]
+    (aget node off))
+  (-rest [this]
+    (if (< (inc off) (alength node))
+      (let [s (chunked-seq vec node i (inc off))]
+        (if (nil? s)
+          ()
+          s))
+      (-chunked-rest this)))
+
+  INext
+  (-next [coll]
+    (if (< (inc off) (alength node))
+      (let [s (chunked-seq vec node i (inc off))]
+        (if (nil? s)
+          nil
+          s))
+      (-chunked-next coll)))
+
+  IChunkedSeq
+  (-chunked-first [coll]
+    ;;(array-chunk node off)
+    )
+  (-chunked-rest [coll]
+    (let [end (+ i (alength node))]
+      (if (< end (-count vec))
+        (chunked-seq vec (unchecked-array-for vec end) end 0)
+        ())))
+
+  IChunkedNext
+  (-chunked-next [coll]
+    (let [end (+ i (alength node))]
+      (when (< end (-count vec))
+        (chunked-seq vec (unchecked-array-for vec end) end 0)))))
 
 (deftype ChunkedCons [chunk more meta]
 
@@ -36,7 +87,7 @@
   (-first [_]
     (-nth chunk 0))
   (-rest [_]
-    (if (torque.core.builtin/> (-count chunk) 1)
+    (if (> (-count chunk) 1)
       (new ChunkedCons (-drop-first chunk) more meta)
       (if (nil? more)
         ()
@@ -44,7 +95,7 @@
 
   INext
   (-next [_]
-    (if (torque.core.builtin/> (-count chunk) 1)
+    (if (> (-count chunk) 1)
       (new ChunkedCons (-drop-first chunk) more meta)
       (let [more (-seq more)]
         (when-not (nil? more)
@@ -73,7 +124,7 @@
     (new ChunkedCons chunk rest nil)))
 
 (defn chunk [b]
-  (. b -chunk))
+  (. b chunk))
 
 (defn chunk-first [s]
   (-chunked-first s))
@@ -88,3 +139,6 @@
 
 (defn chunked-seq? [s]
   (satisfies? IChunkedSeq s))
+
+(defn chunked-seq [vec node i off]
+  (new ChunkedSeq vec node i off))

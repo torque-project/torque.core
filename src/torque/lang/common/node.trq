@@ -28,6 +28,8 @@
   (aset (. node arr) idx val))
 
 (defn pv-index [cnt level]
+  (print cnt)
+  (print level)
   (bit-and (bit-shift-right cnt level) 0x01f))
 
 (defn empty-vector-node []
@@ -46,7 +48,7 @@
          level (. v shift)]
     (if (pos? level)
       (recur (pv-aget node 0) (- level 5))
-      (. node -arr))))
+      (. node arr))))
 
 (defn unchecked-array-for [v i]
   (if (>= i (tail-off v))

@@ -74,8 +74,7 @@
     (when-not (zero? cnt)
       (if (<= cnt 32)
         (array-seq tail)
-        ;; (chunked-seq o (first-array-for-longvec o) 0 0)
-        )))
+        (chunked-seq o (first-array-for-longvec o) 0 0))))
 
   ICounted
   (-count [coll] cnt)

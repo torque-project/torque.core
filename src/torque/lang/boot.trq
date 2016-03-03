@@ -5,56 +5,56 @@
     [torque.lang.protocols]))
 
 (def identical?
-  (fn* [x y] (torque.core.builtin/identical? x y)))
+  (fn* identical? [x y] (torque.core.builtin/identical? x y)))
 
 (def satisfies?
-  (fn* [x y] (torque.core.builtin/satisfies? x y)))
+  (fn* satisfies? [x y] (torque.core.builtin/satisfies? x y)))
 
 (def type
-  (fn* [x] (torque.core.builtin/type x)))
+  (fn* type [x] (torque.core.builtin/type x)))
 
 (def instance?
-  (fn* [t x] (identical? (type x) t)))
+  (fn* instance? [t x] (identical? (type x) t)))
 
 (def make-array
-  (fn* [n] (torque.core.builtin/make-array n)))
+  (fn* make-array [n] (torque.core.builtin/make-array n)))
 
 (def array
-  (fn* [& vs] (torque.core.builtin/array vs)))
+  (fn* array [& vs] (torque.core.builtin/array vs)))
 
 (def aclone
-  (fn* [a] (torque.core.builtin/aclone a)))
+  (fn* aclone [a] (torque.core.builtin/aclone a)))
 
 (def acopy
-  (fn* [dst src off len]
+  (fn* acopy [dst src off len]
     (torque.core.builtin/acopy dst src off len)))
 
 (def aget
-  (fn* [a n] (torque.core.builtin/aget a n)))
+  (fn* aget [a n] (torque.core.builtin/aget a n)))
 
 (def aset
-  (fn* [a n v] (torque.core.builtin/aset a n v)))
+  (fn* aset [a n v] (torque.core.builtin/aset a n v)))
 
 (def alength
   (fn* [a] (torque.core.builtin/alength a)))
 
 (def <
-  (fn* [a b] (torque.core.builtin/< a b)))
+  (fn* < [a b] (torque.core.builtin/< a b)))
 
 (def >
-  (fn* [a b] (torque.core.builtin/> a b)))
+  (fn* > [a b] (torque.core.builtin/> a b)))
 
 (def <=
-  (fn* [a b] (torque.core.builtin/<= a b)))
+  (fn* <= [a b] (torque.core.builtin/<= a b)))
 
 (def >=
-  (fn* [a b] (torque.core.builtin/>= a b)))
+  (fn* >= [a b] (torque.core.builtin/>= a b)))
 
 (def ==
-  (fn* [a b] (torque.core.builtin/== a b)))
+  (fn* == [a b] (torque.core.builtin/== a b)))
 
 (def =
-  (fn* [a b]
+  (fn* = [a b]
     (if (identical? a b)
       true
       (if (satisfies? IEquiv a)
@@ -62,46 +62,46 @@
         false))))
 
 (def nil?
-  (fn* [x] (identical? x nil)))
+  (fn* nil? [x] (identical? x nil)))
 
 (def zero?
-  (fn* [x] (= x 0)))
+  (fn* zero? [x] (= x 0)))
 
 (def pos?
-  (fn* [x] (> x 0)))
+  (fn* pos? [x] (> x 0)))
 
 (def neg?
-  (fn* [x] (< x 0)))
+  (fn* neg? [x] (< x 0)))
 
 (def not
-  (fn* [x] (if x false true)))
+  (fn* not [x] (if x false true)))
 
 (def +
-  (fn* [a b] (torque.core.builtin/+ a b)))
+  (fn* + [a b] (torque.core.builtin/+ a b)))
 
 (def -
-  (fn* [a b] (torque.core.builtin/+ a b)))
+  (fn* - [a b] (torque.core.builtin/- a b)))
 
 (def bit-and
-  (fn* [a b] (torque.core.builtin/& a b)))
+  (fn* bit-and [a b] (torque.core.builtin/& a b)))
 
 (def bit-or
-   (fn* [a b] (torque.core.builtin/| a b)))
+   (fn* bit-or [a b] (torque.core.builtin/| a b)))
 
 (def bit-shift-left
-  (fn* [a b] (torque.core.builtin/bsl a b)))
+  (fn* bit-shift-left [a b] (torque.core.builtin/bsl a b)))
 
 (def bit-shift-right
-  (fn* [a b] (torque.core.builtin/bsr a b)))
+  (fn* bit-shift-right [a b] (torque.core.builtin/bsr a b)))
 
 (def inc
-  (fn* [x] (+ x 1)))
+  (fn* inc [x] (+ x 1)))
 
 (def dec
-  (fn* [x] (- x 1)))
+  (fn* dec [x] (- x 1)))
 
 (def seq
-  (fn* [x] (if x (-seq x) nil)))
+  (fn* seq [x] (if x (-seq x) nil)))
 
 (def with-meta
   (fn* [o meta]
