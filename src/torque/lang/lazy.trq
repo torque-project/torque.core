@@ -1,4 +1,4 @@
-;; -*- mode: clojure;-*-
+;; -*- mode: clojure; eval: (paredit-mode 1);-*-
 ;;   Copyright (c) Rich Hickey. All rights reserved.
 ;;   The use and distribution terms for this software are covered by the
 ;;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
@@ -10,7 +10,8 @@
 (ns torque.lang.lazy
   (:use
     [torque.lang.protocols]
-    [torque.lang.boot]))
+    [torque.lang.boot]
+    [torque.lang.flow]))
 
 (def sval
   (fn* [ls]
@@ -20,7 +21,7 @@
         (set! ls fn nil)
         (. ls s)))))
 
-(deftype LazySeq [^:mutable fn ^:mutable s]
+(deftype LazySeq [fn s]
 
   ;; IPrintable
   ;; (-str [this]

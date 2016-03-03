@@ -1,0 +1,191 @@
+;; -*- mode: clojure; eval: (paredit-mode 1);-*-
+;;   Copyright (c) Rich Hickey. All rights reserved.
+;;   The use and distribution terms for this software are covered by the
+;;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;;   which can be found in the file epl-v10.html at the root of this distribution.
+;;   By using this software in any fashion, you are agreeing to be bound by
+;;   the terms of this license.
+;;   You must not remove this notice, or any other, from this software.
+
+(ns torque.lang.vector
+  (:use
+    [torque.lang.protocols]
+    [torque.lang.boot]
+    [torque.lang.flow]
+    [torque.lang.let]
+    [torque.lang.def]
+    [torque.lang.indexed]
+    [torque.lang.chunked]
+    [torque.lang.common.node]))
+
+(declare extend-root extend-tail)
+
+(deftype PersistentVector [meta cnt shift root tail]
+
+  ;; IPrintable
+  ;; (-str [this]
+  ;;   (seq/pr-str "[" "]" this))
+
+  ICloneable
+  (-clone [_]
+    (new PersistentVector meta cnt shift root tail))
+
+  IWithMeta
+  (-with-meta [o meta]
+    (new PersistentVector meta cnt shift root tail))
+
+  IMeta
+  (-meta [o] meta)
+
+  ICollection
+  (-conj [coll o]
+    (if (< (- cnt (tail-off coll)) 32)
+      (extend-tail coll o)
+      (extend-root coll o)))
+
+  ;; ILookup
+  ;; (-lookup [o k]
+  ;;   (-lookup o k nil))
+  ;; (-lookup [o k not-found]
+  ;;   (if (integer? k)
+  ;;     (-nth o k not-found)
+  ;;     not-found))
+
+  ;; IAssociative
+  ;; (-contains-key? [coll k]
+  ;;   false)
+
+  ;; (-assoc [coll k v]
+  ;;   (if (integer? k)
+  ;;     (if (and1 (<= 0 k) (< k cnt))
+  ;;       (if (<= (tail-off coll) k)
+  ;;         (let [new-tail (aclone tail)]
+  ;;           (aset new-tail (bit-and k 0x01f) v)
+  ;;           (new PersistentVector meta cnt shift root new-tail nil))
+  ;;         (let [new-root (do-assoc coll shift root k v)]
+  ;;           (new PersistentVector meta cnt shift new-root tail nil)))
+  ;;       (if (== k cnt)
+  ;;         (-conj coll v)
+  ;;         (throw-out-of-bounds k)))
+  ;;     (throw-not-an-index k)))
+
+  ISeqable
+  (-seq [o]
+    (when-not (zero? cnt)
+      (if (<= cnt 32)
+        (array-seq tail)
+        ;; (chunked-seq o (first-array-for-longvec o) 0 0)
+        )))
+
+  ICounted
+  (-count [coll] cnt)
+
+  IIndexed
+  (-nth [coll n]
+    (-nth coll n nil))
+  (-nth [coll n not-found]
+    ;; no and yet :(
+    (if (<= 0 n)
+      (if (< n cnt)
+        (aget (unchecked-array-for coll n) (bit-and n 0x01f))
+        not-found)
+      not-found))
+
+  ;; IMapEntry
+  ;; (-key [coll]
+  ;;   (-nth coll 0))
+  ;; (-val [coll]
+  ;;   (-nth coll 1))
+
+  ;; IEquiv
+  ;; (-equiv [o other]
+  ;;   (seq/equiv o other))
+
+  ;; IReduce
+  ;; (-reduce [coll f init]
+  ;;   (loop [i     0
+  ;;          state init]
+  ;;     (if (< i cnt)
+  ;;       (let [arr    (unchecked-array-for coll i)
+  ;;             result (areduce arr j res state (f res (aget arr j)))]
+  ;;         (recur (+ i (alength arr)) result))
+  ;;       state)))
+  )
+
+(defn ^:private new-path [edit level node]
+  (loop [ll  level
+         ret node]
+    (if (zero? ll)
+      ret
+      (let [embed ret
+            r     (pv-fresh-node edit)]
+        (pv-aset r 0 embed)
+        (recur (- ll 5) r)))))
+
+(defn ^:private push-tail [node level parent tailnode]
+  (let [ret    (pv-clone-node parent)
+        subidx (pv-index (dec (. node cnt)) level)]
+    (if (== 5 level)
+      (do
+        (pv-aset ret subidx tailnode)
+        ret)
+      (let [child (pv-aget parent subidx)
+            level (- level 5)
+            node  (if-not (nil? child)
+                    (push-tail node level child tailnode)
+                    (new-path nil level tailnode))]
+        (pv-aset ret subidx node)
+        ret))))
+
+(defn ^:private extend-tail [coll o]
+  (let [len      (alength (. coll tail))
+        new-tail (make-array (inc len))]
+    (acopy new-tail (. coll tail) 0 len)
+    (aset new-tail len o)
+    (new PersistentVector
+      (meta coll)
+      (inc (. coll cnt))
+      (. coll shift)
+      (. coll root)
+      new-tail)))
+
+(defn ^:private make-root [coll shift overflow?]
+  (let [new-node (new VectorNode nil (. coll tail))
+        shift    (. coll shift)]
+    (if overflow?
+      (let [new-root (pv-fresh-node nil)]
+        (pv-aset new-root 0 (. coll root))
+        (pv-aset new-root 1 (new-path nil shift new-node))
+        new-root)
+      (push-tail coll shift (. coll root) new-node))))
+
+(defn ^:private root-overflow? [cnt shift]
+  (> (bit-shift-right cnt 5) (bit-shift-left 1 shift)))
+
+(defn ^:private extend-root [coll o]
+  (let [cnt       (. coll cnt)
+        shift     (. coll shift)
+        overflow? (root-overflow? cnt shift)
+        new-shift (if overflow? (+ shift 5) shift)
+        new-root  (make-root coll shift overflow?)]
+    (new PersistentVector
+      (-meta coll)
+      (inc cnt)
+      new-shift
+      new-root
+      (array o))))
+
+(defn empty-vector []
+  (new PersistentVector nil 0 5 (empty-vector-node) (make-array 0)))
+
+(def empty (empty-vector))
+
+(defn vec [args]
+  (loop [xs (seq args)
+         v  empty]
+    (if xs
+      (recur (next xs) (-conj v (first xs)))
+      v)))
+
+(defn vector [& args]
+  (vec args))

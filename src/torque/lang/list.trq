@@ -81,4 +81,3 @@
 (def list
   (fn* [& args]
     (reverse (reverse args))))
-

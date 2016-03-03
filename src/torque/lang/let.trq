@@ -24,3 +24,7 @@
           (list 'if (-nth binding 0)
                 then
                 else))))
+
+(def ^:macro loop
+  (fn* [& forms]
+    (cons 'loop* forms)))

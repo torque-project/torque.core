@@ -7,7 +7,12 @@
     [torque.lang.cons]
     [torque.lang.list]
     [torque.lang.flow]
-    [torque.lang.defn]
     [torque.lang.let]
+    [torque.lang.def]
     [torque.lang.lazy]
-    [torque.lang.seq]))
+    [torque.lang.seq]
+    [torque.lang.indexed]
+    [torque.lang.chunked]
+    [torque.lang.vector]
+    [torque.lang.squote]
+    [torque.lang.predicates]))

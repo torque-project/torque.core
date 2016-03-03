@@ -1,0 +1,59 @@
+;; -*- mode: clojure; eval: (paredit-mode 1);-*-
+;;   Copyright (c) Rich Hickey. All rights reserved.
+;;   The use and distribution terms for this software are covered by the
+;;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;;   which can be found in the file epl-v10.html at the root of this distribution.
+;;   By using this software in any fashion, you are agreeing to be bound by
+;;   the terms of this license.
+;;   You must not remove this notice, or any other, from this software.
+
+(ns torque.lang.common.node
+  (:use
+    [torque.lang.boot]
+    [torque.lang.let]
+    [torque.lang.def]))
+
+(deftype VectorNode [edit arr])
+
+(defn pv-fresh-node [edit]
+  (new VectorNode edit (make-array 32)))
+
+(defn pv-clone-node [node]
+  (new VectorNode (. node edit) (aclone (. node arr))))
+
+(defn pv-aget [node idx]
+  (aget (. node arr) idx))
+
+(defn pv-aset [node idx val]
+  (aset (. node arr) idx val))
+
+(defn pv-index [cnt level]
+  (bit-and (bit-shift-right cnt level) 0x01f))
+
+(defn empty-vector-node []
+  (pv-fresh-node nil))
+
+(defn tail-off [v]
+  (let [cnt (. v cnt)]
+    (if (< cnt 32)
+      0
+      (bit-shift-left
+        (bit-shift-right (dec cnt) 5)
+        5))))
+
+(defn first-array-for-longvec [v]
+  (loop [node  (. v root)
+         level (. v shift)]
+    (if (pos? level)
+      (recur (pv-aget node 0) (- level 5))
+      (. node -arr))))
+
+(defn unchecked-array-for [v i]
+  (if (>= i (tail-off v))
+    (. v tail)
+    (loop [node  (. v root)
+           level (. v shift)]
+      (if (pos? level)
+        (recur (pv-aget node (pv-index i level))
+               (- level 5))
+        (. node arr)))))

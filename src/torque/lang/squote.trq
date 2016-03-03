@@ -7,23 +7,31 @@
 ;;   the terms of this license.
 ;;   You must not remove this notice, or any other, from this software.
 
-(ns torque.lang.concat
+(ns torque.lang.squote
   (:use
    [torque.lang.protocols]
    [torque.lang.boot]
    [torque.lang.seq]
    [torque.lang.chunked]))
 
-;; This is in it's own namespace, since providing concat enables
+;; This is in its own namespace, since providing apply and concat enables
 ;; syntax quotes, which are then used in all the code past this point
+
+(defn ^:private collect [xs]
+  (if-let [ys (next xs)]
+    (cons (first xs) (collect xs))
+    (first xs)))
+
+(defn apply [f & args]
+  (apply* f (collect args)))
 
 (defn ^:private cat [xys zs]
   (lazy-seq
-    (let [xys (seq xys)]
-      (if xys
-        (if (chunked-seq? xys)
-          (chunk-cons (chunk-first xys) (cat (chunk-rest xys) zs))
-          (cons (first xys) (cat (rest xys) zs)))
+    (let [s (seq xys)]
+      (if s
+        (if (chunked-seq? s)
+          (chunk-cons (chunk-first s) (cat (chunk-rest s) zs))
+          (cons (first s) (cat (rest s) zs)))
         (when zs
           (cat (first zs) (next zs)))))))
 

@@ -1,0 +1,54 @@
+;; -*- mode: clojure; eval: (paredit-mode 1);-*-
+;;   Copyright (c) Rich Hickey. All rights reserved.
+;;   The use and distribution terms for this software are covered by the
+;;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;;   which can be found in the file epl-v10.html at the root of this distribution.
+;;   By using this software in any fashion, you are agreeing to be bound by
+;;   the terms of this license.
+;;   You must not remove this notice, or any other, from this software.
+
+(ns torque.lang.indexed
+  (:use
+    [torque.lang.protocols]
+    [torque.lang.boot]))
+
+(deftype IndexedSeq [arr i]
+
+  ;; IPrintable
+  ;; (-str [this]
+  ;;   (seq/pr-str "(" ")" this))
+
+  ISeqable
+  (-seq [o] o)
+
+  ISeq
+  (-first [_]
+    (aget arr i))
+  (-rest [_]
+    (if (< (inc i) (alength arr))
+      (new IndexedSeq arr (inc i))
+      ()))
+
+  INext
+  (-next [_]
+    (if (< (inc i) (alength arr))
+      (new IndexedSeq arr (inc i))
+      nil))
+
+  ICounted
+  (-count [_]
+    (- (alength arr) i))
+
+  IIndexed
+  (-nth [coll n]
+    (let [i (+ n i)]
+      (when (< i (alength arr))
+        (aget arr i))))
+
+  ;; IEquiv
+  ;; (-equiv [o other]
+  ;;   (seq/equiv o other))
+  )
+
+(defn array-seq [arr]
+  (new IndexedSeq arr 0))

@@ -1,0 +1,32 @@
+;; -*- mode: clojure;-*-
+
+(ns torque.lang.def
+  (:use
+    [torque.lang.protocols]
+    [torque.lang.boot]
+    [torque.lang.list]
+    [torque.lang.let]))
+
+;; This defones the fn macro for the first time as a simple forward to
+;; fn*. Later on this will be redefined with destructuring and other
+;; goodies
+(def ^:macro fn
+  (fn* [& fdecl]
+    (cons 'fn* fdecl)))
+
+(def ^:macro defn
+  (fn [name & fdecl]
+    ;; TODO: parse meta information and attach to
+    ;; function definition
+    (list 'def name (cons 'fn (cons name fdecl)))))
+
+(def ^:macro declare
+  (fn* [& names]
+    (cons 'do
+          (loop [xs    names
+                 forms (empty-list)]
+            (if xs
+              (recur (-next xs)
+                     (cons (list 'def (-first xs))
+                           forms))
+              forms)))))
