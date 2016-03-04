@@ -1,0 +1,26 @@
+(ns torque.lang.common.seq
+  (:use
+    [torque.lang.boot]
+    [torque.lang.seq]))
+
+(defn count [coll]
+  (loop [s   (seq coll)
+         acc 0]
+    (if (counted? s)
+      (+ acc (-count s))
+      (if s
+        (recur (next s) (inc acc))
+        acc))))
+
+(defn reduce
+  ([f coll]
+    (if-let [s (seq coll)]
+      (reduce f (first s) (next s))
+      (f)))
+  ([f init coll]
+   (loop [val init
+          xs  (seq coll)]
+     (if xs
+       (let [nval (f val (first xs))]
+         (recur nval (next xs)))
+       val))))

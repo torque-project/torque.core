@@ -90,11 +90,11 @@
         not-found)
       not-found))
 
-  ;; IMapEntry
-  ;; (-key [coll]
-  ;;   (-nth coll 0))
-  ;; (-val [coll]
-  ;;   (-nth coll 1))
+  IMapEntry
+  (-key [coll]
+    (-nth coll 0))
+  (-val [coll]
+    (-nth coll 1))
 
   ;; IEquiv
   ;; (-equiv [o other]

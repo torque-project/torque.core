@@ -15,4 +15,5 @@
     [torque.lang.chunked]
     [torque.lang.vector]
     [torque.lang.squote]
-    [torque.lang.predicates]))
+    [torque.lang.predicates]
+    [torque.lang.algo]))

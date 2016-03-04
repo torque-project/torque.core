@@ -41,6 +41,8 @@
 
   IIndexed
   (-nth [coll n]
+    (-nth coll n nil))
+  (-nth [coll n]
     (let [i (+ n i)]
       (when (< i (alength arr))
         (aget arr i))))

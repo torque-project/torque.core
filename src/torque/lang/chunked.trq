@@ -142,3 +142,13 @@
 
 (defn chunked-seq [vec node i off]
   (new ChunkedSeq vec node i off))
+
+(defn chunk-append [b x]
+  (let [end (. b end)]
+    (aset (. b buf) end x)
+    (set! b end (inc end))))
+
+(deftype ChunkBuffer [buf end])
+
+(defn chunk-buffer [capacity]
+  (new ChunkBuffer (make-array capacity) 0))

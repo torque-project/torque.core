@@ -7,11 +7,49 @@
     [torque.lang.def]
     [torque.lang.let]))
 
+(defn coll? [x]
+  (satisfies? ICollection x))
+
+(defn set? [x]
+  (satisfies? ISet x))
+
+(defn associative? [x]
+  (satisfies? IAssociative x))
+
+(defn sorted? [x]
+  (satisfies? ISorted x))
+
+(defn seqable? [x]
+  (satisfies? ISeqable x))
+
+(defn reduceable? [x]
+  (satisfies? IReduce x))
+
+(defn list? [x]
+  (satisfies? AList x))
+
+(defn vector? [x]
+  (satisfies? IVector x))
+
+(defn map? [x]
+  (satisfies? IMap x))
+
+(defn chunked-seq? [x]
+  (satisfies? IChunkedSeq x))
+
+(defn record? [x]
+  (satisfies? IRecord x))
+
+(defn indexed? [x]
+  (satisfies? IIndexed x))
+
+(defn counted? [x]
+  (satisfies? ICounted x))
+
+(defn array? [x]
+  (torque.core.builtin/array? x))
+
 (def ^:macro and
-  "Evaluates exprs one at a time, from left to right. If a form
-  returns logical false (nil or false), and returns that value and
-  doesn't evaluate any of the other expressions, otherwise it returns
-  the value of the last expr. (and) returns true."
   (fn
     ([]  true)
     ([x] x)
@@ -27,11 +65,16 @@
      `(let [or# ~x]
         (if or# or# (or ~@xs))))))
 
-;; (defn pos? [x]
-;;   (torque.core.builtin/> x 0))
+(defn complement
+  [f]
+  (fn
+    ([] (not (f)))
+    ([x] (not (f x)))
+    ([x y] (not (f x y)))
+    ([x y & zs] (not (apply f x y zs)))))
 
-;; (defn neg? [x]
-;;   (torque.core.builtin/< x 0))
-
-;; (defn zero? [x]
-;;   (torque.core.builtin/== x 0))
+(defn some
+  [pred coll]
+  (when (seq coll)
+    (or (pred (first coll))
+        (recur pred (next coll)))))
