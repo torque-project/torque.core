@@ -3,10 +3,22 @@
     [torque.lang.boot]
     [torque.lang.seq]))
 
+(defn equiv [x y]
+  (when (satisfies? ISeqable y)
+    (loop [xs (seq x)
+           ys (seq y)]
+      (if (nil? xs)
+        (nil? ys)
+        (if (nil? ys)
+          false
+          (if (= (first xs) (first ys))
+            (recur (next xs) (next ys))
+            false))))))
+
 (defn count [coll]
   (loop [s   (seq coll)
          acc 0]
-    (if (counted? s)
+    (if (satisfies? ICounted s)
       (+ acc (-count s))
       (if s
         (recur (next s) (inc acc))
@@ -24,3 +36,14 @@
        (let [nval (f val (first xs))]
          (recur nval (next xs)))
        val))))
+
+;; (defn pr-str [begin end coll]
+;;   (if (empty? coll)
+;;     (str begin end)
+;;     (str begin
+;;          (reduce
+;;           (fn [s x]
+;;             (str s " " (-str x)))
+;;           (first coll)
+;;           (rest coll))
+;;          end)))

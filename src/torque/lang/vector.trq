@@ -16,7 +16,9 @@
     [torque.lang.def]
     [torque.lang.indexed]
     [torque.lang.chunked]
-    [torque.lang.common.node]))
+    [torque.lang.common.node])
+  (:require
+    [torque.lang.common.seq :as seq]))
 
 (declare extend-root extend-tail)
 
@@ -96,9 +98,9 @@
   (-val [coll]
     (-nth coll 1))
 
-  ;; IEquiv
-  ;; (-equiv [o other]
-  ;;   (seq/equiv o other))
+  IEquiv
+  (-equiv [o other]
+    (seq/equiv o other))
 
   ;; IReduce
   ;; (-reduce [coll f init]
@@ -177,14 +179,15 @@
 (defn empty-vector []
   (new PersistentVector nil 0 5 (empty-vector-node) (make-array 0)))
 
-(def empty (empty-vector))
-
 (defn vec [args]
   (loop [xs (seq args)
-         v  empty]
+         v  (empty-vector)]
     (if xs
       (recur (next xs) (-conj v (first xs)))
       v)))
 
 (defn vector [& args]
   (vec args))
+
+(defn vector? [x]
+  (satisfies? IVector x))

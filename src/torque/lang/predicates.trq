@@ -28,9 +28,6 @@
 (defn list? [x]
   (satisfies? AList x))
 
-(defn vector? [x]
-  (satisfies? IVector x))
-
 (defn map? [x]
   (satisfies? IMap x))
 
@@ -50,7 +47,7 @@
   (torque.core.builtin/array? x))
 
 (def ^:macro and
-  (fn
+  (fn and
     ([]  true)
     ([x] x)
     ([x & next]
@@ -58,7 +55,7 @@
         (if and# (and ~@next) and#)))))
 
 (def ^:macro or
-  (fn
+  (fn or
     ([]  nil)
     ([x] x)
     ([x & xs]
@@ -67,7 +64,7 @@
 
 (defn complement
   [f]
-  (fn
+  (fn complement
     ([] (not (f)))
     ([x] (not (f x)))
     ([x y] (not (f x y)))

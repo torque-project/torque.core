@@ -1,0 +1,28 @@
+(ns torque.lang.exceptions
+  (:use
+    [torque.lang.protocols]
+    [torque.lang.boot]))
+
+(deftype ExceptionInfo [message data cause])
+
+(def ex-info
+  (fn* ex-info
+    ([msg map]
+     (new ExceptionInfo msg map nil))
+    ([msg map cause]
+     (new ExceptionInfo msg map cause))))
+
+(def ex-message
+  (fn* ex-message [ex]
+    (if (instance? ExceptionInfo ex)
+      (. ex message))))
+
+(def ex-cause
+  (fn* ex-cause
+    [ex]
+    (if (instance? ExceptionInfo ex)
+      (. ex cause))))
+
+(def ^:macro throw
+  (fn* throw [x]
+    (list 'torque.core.builtin/throw x)))

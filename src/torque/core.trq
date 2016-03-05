@@ -14,6 +14,7 @@
     [torque.lang.indexed]
     [torque.lang.chunked]
     [torque.lang.vector]
+    [torque.lang.map]
     [torque.lang.squote]
     [torque.lang.predicates]
     [torque.lang.algo]))

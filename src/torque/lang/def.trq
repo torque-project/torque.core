@@ -11,17 +11,17 @@
 ;; fn*. Later on this will be redefined with destructuring and other
 ;; goodies
 (def ^:macro fn
-  (fn* [& fdecl]
+  (fn* fn [& fdecl]
     (cons 'fn* fdecl)))
 
 (def ^:macro defn
-  (fn [name & fdecl]
+  (fn defn [name & fdecl]
     ;; TODO: parse meta information and attach to
     ;; function definition
     (list 'def name (cons 'fn (cons name fdecl)))))
 
 (def ^:macro declare
-  (fn* [& names]
+  (fn* declare [& names]
     (cons 'do
           (loop [xs    names
                  forms (empty-list)]

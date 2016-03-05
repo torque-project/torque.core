@@ -82,6 +82,12 @@
 (def -
   (fn* - [a b] (torque.core.builtin/- a b)))
 
+(def *
+  (fn* * [a b] (torque.core.builtin/* a b)))
+
+(def /
+  (fn* / [a b] (torque.core.builtin// a b)))
+
 (def bit-and
   (fn* bit-and [a b] (torque.core.builtin/& a b)))
 
@@ -116,7 +122,6 @@
         (-meta o)
         nil)
       nil)))
-
 
 (def print
   (fn* [x]

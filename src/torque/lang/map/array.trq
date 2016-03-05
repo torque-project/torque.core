@@ -1,0 +1,211 @@
+;; -*- mode: clojure; eval: (paredit-mode 1);-*-
+;;   Copyright (c) Rich Hickey. All rights reserved.
+;;   The use and distribution terms for this software are covered by the
+;;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;;   which can be found in the file epl-v10.html at the root of this distribution.
+;;   By using this software in any fashion, you are agreeing to be bound by
+;;   the terms of this license.
+;;   You must not remove this notice, or any other, from this software.
+
+(ns torque.lang.map.array
+  (:use
+    [torque.lang.boot]
+    [torque.lang.cons]
+    [torque.lang.let]
+    [torque.lang.seq]
+    [torque.lang.vector])
+  (:require
+    [torque.lang.common.seq :as seq]))
+
+;; TODO: needs keyword implementation in vm
+(def lookup-sentinel '::lookup-sentinel)
+
+(defn array-map-index-of [m k]
+  (let [arr (. m arr)
+        len (alength arr)]
+    (loop [i 0]
+      (cond
+        (<= len i) -1
+        (= k (aget arr i)) i
+        true (recur (+ i 2))))))
+
+(defn array-map-extend-kv [m k v]
+  (let [arr  (. m arr)
+        l    (alength arr)
+        narr (make-array (+ l 2))]
+    (loop [i 0]
+      (when (< i l)
+        (aset narr i (aget arr i))
+        (recur (inc i))))
+    (aset narr l k)
+    (aset narr (inc l) v)
+    narr))
+
+(deftype PersistentArrayMapSeq [arr i meta]
+
+  ;; IPrintable
+  ;; (-str [this]
+  ;;   (seq/pr-str "(" ")" this))
+
+  IMeta
+  (-meta [o] meta)
+
+  IWithMeta
+  (-with-meta [o meta]
+    (new PersistentArrayMapSeq arr i meta))
+
+  ICounted
+  (-count [_]
+    (/ (- (alength arr) i) 2))
+
+  ISeqable
+  (-seq [o] o)
+
+  IEquiv
+  (-equiv [o other]
+    (seq/equiv o other))
+
+  ICollection
+  (-conj [coll o]
+    (cons o coll))
+
+  ISeq
+  (-first [this]
+    [(aget arr i) (aget arr (inc i))])
+
+  (-rest [this]
+    (if (< i (- (alength arr) 2))
+      (new PersistentArrayMapSeq arr (+ i 2) meta)
+      ()))
+
+  INext
+  (-next [coll]
+    (when (< i (- (alength arr) 2))
+      (new PersistentArrayMapSeq arr (+ i 2) meta)))
+
+  IReduce
+  (-reduce [coll f]
+    (seq/reduce f coll))
+  (-reduce [coll f start]
+    (seq/reduce f start coll)))
+
+(deftype PersistentArrayMap [meta cnt arr]
+
+  ;; IPrintable
+  ;; (-str [this]
+  ;;   (seq/pr-str "{" "}" (new IndexedSeq arr 0)))
+
+  ICloneable
+  (-clone [_]
+    (new PersistentArrayMap meta cnt arr))
+
+  IWithMeta
+  (-with-meta [o meta]
+    (new PersistentArrayMap meta cnt arr))
+
+  IMeta
+  (-meta [o] meta)
+
+  ICollection
+  (-conj [coll o]
+    (if (vector? o)
+      (-assoc coll (-nth o 0) (-nth o 1))
+      (loop [ret coll
+             es  (seq o)]
+        (if (nil? es)
+          ret
+          (let [e (first es)]
+            (if (vector? e)
+              (recur (-assoc ret (-nth e 0) (-nth e 1))
+                     (next es))
+              nil))))))
+
+  IEquiv
+  (-equiv [o other]
+    (when (satisfies? IMap other)
+      (let [alen  (alength arr)
+            other other]
+        (if (== cnt (-count other))
+          (loop [i 0]
+            (if (< i alen)
+              (let [v (-lookup other (aget arr i) lookup-sentinel)]
+                (if-not (identical? v lookup-sentinel)
+                  (if (= (aget arr (inc i)) v)
+                    (recur (+ i 2))
+                    false)
+                  false))
+              true))
+          false))))
+
+  ISeqable
+  (-seq [o]
+    (new PersistentArrayMapSeq arr 0 nil))
+
+  ICounted
+  (-count [coll] cnt)
+
+  ILookup
+  (-lookup [o k]
+    (-lookup o k nil))
+  (-lookup [o k not-found]
+    (let [idx (array-map-index-of o k)]
+      (if (== idx -1)
+        not-found
+        (aget arr (inc idx)))))
+
+  IAssociative
+  (-contains-key? [coll k]
+    (not (== (array-map-index-of coll k) -1)))
+
+  (-assoc [coll k v]
+    (let [idx (array-map-index-of coll k)]
+      (cond
+        (== idx -1)
+        (let [arr (array-map-extend-kv coll k v)]
+            (new PersistentArrayMap meta (inc cnt) arr))
+
+        (identical? v (aget arr (inc idx)))
+          coll
+
+        true
+          (let [arr (aclone arr)]
+            (aset arr (inc idx) v)
+            (new PersistentArrayMap meta cnt arr)))))
+
+  IMap
+  (-dissoc [coll k]
+    (let [idx (array-map-index-of coll k)]
+      (if (>= idx 0)
+        (let [len     (alength arr)
+              new-len (- len 2)]
+          (if (zero? new-len)
+            (-empty coll)
+            (let [new-arr (make-array new-len)]
+              (loop [s 0 d 0]
+                (cond
+                  (>= s len)
+                    (new PersistentArrayMap meta (dec cnt) new-arr)
+                  (= k (aget arr s))
+                    (recur (+ s 2) d)
+                  true
+                    (do
+                      (aset new-arr d (aget arr s))
+                      (aset new-arr (inc d) (aget arr (inc s)))
+                      (recur (+ s 2) (+ d 2))))))))
+        coll)))
+
+  IReduce
+  (-reduce [coll f start]
+    (seq/reduce f start coll)))
+
+(defn empty-persistent-array-map []
+  (new PersistentArrayMap nil 0 (array)))
+
+(defn array-map [& kvs]
+  (loop [m  (empty-persistent-array-map)
+         xs (seq kvs)]
+    (if xs
+      (let [k  (first xs)
+            v  (second xs)]
+        (recur (-assoc m k v) (nthrest xs 2)))
+      m)))

@@ -79,5 +79,5 @@
         out))))
 
 (def list
-  (fn* [& args]
+  (fn* list [& args]
     (reverse (reverse args))))

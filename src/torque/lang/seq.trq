@@ -28,6 +28,14 @@
         ())
       ())))
 
+(defn nthrest [coll n]
+  (loop [i n xs coll]
+    (if-let [s (seq xs)]
+      (if (pos? i)
+        (recur (dec i) (rest xs))
+        xs)
+      xs)))
+
 (defn next [s]
   (when-not (nil? s)
     (if (satisfies? INext s)

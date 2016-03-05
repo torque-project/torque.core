@@ -1,0 +1,123 @@
+;; -*- mode: clojure; eval: (paredit-mode 1);-*-
+;;   Copyright (c) Rich Hickey. All rights reserved.
+;;   The use and distribution terms for this software are covered by the
+;;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;;   which can be found in the file epl-v10.html at the root of this distribution.
+;;   By using this software in any fashion, you are agreeing to be bound by
+;;   the terms of this license.
+;;   You must not remove this notice, or any other, from this software.
+
+(ns torque.lang.map
+  (:inherit
+    [torque.lang.map.array])
+  (:use
+    [torque.lang.boot]
+    [torque.lang.cons]
+    [torque.lang.let]
+    [torque.lang.seq])
+  (:require
+    [torque.lang.common.seq :as seq]))
+
+(deftype KeySeq [mseq meta]
+
+  ;; IPrintable
+  ;; (-str [this]
+  ;;   (seq/pr-str "(" ")" this))
+
+  IMeta
+  (-meta [o] meta)
+
+  IWithMeta
+  (-with-meta [o meta]
+    (new KeySeq mseq meta))
+
+  ISeqable
+  (-seq [o] o)
+
+  IEquiv
+  (-equiv [o other]
+    (seq/equiv o other))
+
+  ICollection
+  (-conj [coll o]
+    (cons o coll))
+
+  ISeq
+  (-first [_]
+    (let [me (-first mseq)]
+      (-key me)))
+
+  (-rest [_]
+    (if-let [nseq (next mseq)]
+      (new KeySeq nseq meta)
+      ()))
+
+  INext
+  (-next [coll]
+    (when-let [nseq (next mseq)]
+      (new KeySeq nseq meta)))
+
+  IReduce
+  (-reduce [coll f]
+    (seq/reduce f coll))
+  (-reduce [coll f start]
+    (seq/reduce f start coll)))
+
+(deftype ValSeq [mseq meta]
+
+  ;; IPrintable
+  ;; (-str [this]
+  ;;   (seq/pr-str "(" ")" this))
+
+  IMeta
+  (-meta [o] meta)
+
+  IWithMeta
+  (-with-meta [o meta]
+    (new ValSeq mseq meta))
+
+  ISeqable
+  (-seq [o] o)
+
+  IEquiv
+  (-equiv [o other]
+    (seq/equiv o other))
+
+  ICollection
+  (-conj [coll o]
+    (cons o coll))
+
+  ISeq
+  (-first [_]
+    (let [me (-first mseq)]
+      (-val me)))
+
+  (-rest [_]
+    (if-let [nseq (next mseq)]
+      (new ValSeq nseq meta)
+      ()))
+
+  INext
+  (-next [coll]
+    (when-let [nseq (next mseq)]
+      (new ValSeq nseq meta)))
+
+  IReduce
+  (-reduce [coll f]
+    (seq/reduce f coll))
+  (-reduce [coll f start]
+    (seq/reduce f start coll)))
+
+(defn keys [m]
+  (when-let [mseq (seq m)]
+    (new KeySeq mseq nil)))
+
+(defn key [entry]
+  (-key entry))
+
+(defn vals [m]
+  (when-let [mseq (seq m)]
+    (new ValSeq mseq nil)))
+
+(defn val [entry]
+  (-val entry))
