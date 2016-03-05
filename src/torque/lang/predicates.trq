@@ -43,9 +43,6 @@
 (defn counted? [x]
   (satisfies? ICounted x))
 
-(defn array? [x]
-  (torque.core.builtin/array? x))
-
 (def ^:macro and
   (fn and
     ([]  true)

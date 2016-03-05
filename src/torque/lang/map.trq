@@ -108,6 +108,8 @@
   (-reduce [coll f start]
     (seq/reduce f start coll)))
 
+(def hash-map array-map)
+
 (defn keys [m]
   (when-let [mseq (seq m)]
     (new KeySeq mseq nil)))
@@ -121,3 +123,48 @@
 
 (defn val [entry]
   (-val entry))
+
+(defn get
+  ([o k]
+   (get o k nil))
+  ([o k not-found]
+   (if-not (nil? o)
+     (cond
+       (satisfies? ILookup o)
+       (-lookup o k not-found)
+
+       (array? o)
+       (if (< k (. o length))
+         (aget o k)
+         not-found)
+
+       true not-found)
+     not-found)))
+
+(defn assoc
+  ([coll k v]
+   (if (nil? coll)
+     (hash-map k v)
+     (-assoc coll k v)))
+  ([coll k v & kvs]
+   (loop [ret (assoc coll k v)
+          xs  kvs]
+     (if xs
+       (recur (assoc coll
+                     (first kvs)
+                     (second kvs))
+              (nnext kvs))
+       ret))))
+
+(defn dissoc
+  ([coll] coll)
+  ([coll k]
+   (when-not (nil? coll)
+     (-dissoc coll k)))
+  ([coll k & ks]
+   (when-not (nil? coll)
+     (loop [ret (dissoc coll k)
+            xs  ks]
+       (if ks
+         (recur (dissoc (first ks)) (next ks))
+         ret)))))
