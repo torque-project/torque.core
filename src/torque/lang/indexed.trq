@@ -42,10 +42,11 @@
   IIndexed
   (-nth [coll n]
     (-nth coll n nil))
-  (-nth [coll n]
+  (-nth [coll n not-found]
     (let [i (+ n i)]
-      (when (< i (alength arr))
-        (aget arr i))))
+      (if (< i (alength arr))
+        (aget arr i)
+        not-found)))
 
   ;; IEquiv
   ;; (-equiv [o other]

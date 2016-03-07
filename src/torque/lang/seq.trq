@@ -22,22 +22,25 @@
     (list 'let ['and# a]
           (list 'if 'and# b 'and#))))
 
+(defn seq? [s]
+  (and1 (not (nil? s)) (satisfies? ISeq s)))
+
 (defn empty? [s]
   (or1 (nil? s) (not (seq s))))
 
-(defn first [s]
-  (when-not (nil? s)
-    (if (satisfies? ISeq s)
-      (-first s)
-      (when-let [s (seq s)]
+(defn first [coll]
+  (when-not (nil? coll)
+    (if (satisfies? ISeq coll)
+      (-first coll)
+      (when-let [s (seq coll)]
         (-first s)))))
 
-(defn rest [s]
-  (when-not (nil? s)
-    (if (satisfies? ISeq s)
-      (-rest s)
-      (if-let [s (seq s)]
-        (-rest s)
+(defn rest [coll]
+  (when-not (nil? coll)
+    (if (satisfies? ISeq coll)
+      (-rest coll)
+      (if-let [s (seq coll)]
+        (-rest coll)
         ())
       ())))
 

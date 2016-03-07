@@ -12,7 +12,7 @@
    [torque.lang.protocols]
    [torque.lang.boot]))
 
-(deftype Cons [first rest]
+(deftype Cons [first rest meta]
 
   ;; IPrintable
   ;; (-str [this]
@@ -22,7 +22,14 @@
 
   ICloneable
   (-clone [_]
-    (new Cons first rest))
+    (new Cons first rest nil))
+
+  IWithMeta
+  (-with-meta [o meta]
+    (new Cons first rest meta))
+
+  IMeta
+  (-meta [o] meta)
 
   ISeq
   (-first [_]
@@ -40,7 +47,7 @@
 
   ICollection
   (-conj [coll o]
-    (new Cons o coll))
+    (new Cons o coll meta))
 
   ;; IEquiv
   ;; (-equiv [o other]
@@ -59,8 +66,8 @@
 (def cons
   (fn* [x coll]
     (if (nil? coll)
-      (new Cons x coll)
+      (new Cons x coll nil)
       (if (satisfies? ISeq coll)
-        (new Cons x coll)
-        (new Cons x (seq coll))))))
+        (new Cons x coll nil)
+        (new Cons x (seq coll) nil)))))
 
