@@ -113,16 +113,25 @@
   (-equiv [o other]
     (seq/equiv o other))
 
-  ;; IReduce
-  ;; (-reduce [coll f init]
-  ;;   (loop [i     0
-  ;;          state init]
-  ;;     (if (< i cnt)
-  ;;       (let [arr    (unchecked-array-for coll i)
-  ;;             result (areduce arr j res state (f res (aget arr j)))]
-  ;;         (recur (+ i (alength arr)) result))
-  ;;       state)))
-  )
+  IReduce
+  (-reduce [coll f init]
+    (loop [i     0
+           state init]
+      (if (< i cnt)
+        (let [arr    (unchecked-array-for coll i)
+              len    (alength arr)
+              result (loop [j    0
+                            init init]
+                       (if (< j len)
+                         (let [init (f init (aget arr j))]
+                           (if (reduced? init)
+                             init
+                             (recur (inc j) init)))
+                         init))]
+          (if (reduced? init)
+            @init
+            (recur (+ i len) result)))
+        state))))
 
 (defn ^:private new-path [edit level node]
   (loop [ll  level

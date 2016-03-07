@@ -299,16 +299,3 @@
                res
                x))
       res)))
-
-(deftype Reduced [val]
-  IDeref
-  (-deref [o] val))
-
-(defn reduced [x]
-  (new Reduced x))
-
-(defn reduced? [r]
-  (instance? Reduced r))
-
-(defn deref [o]
-  (-deref o))

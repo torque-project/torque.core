@@ -134,6 +134,22 @@
         nil)
       nil)))
 
+(deftype Reduced [val]
+  IDeref
+  (-deref [o] val))
+
+(def reduced
+  (fn* reduced [x]
+    (new Reduced x)))
+
+(def reduced?
+  (fn* reduced? [r]
+    (instance? Reduced r)))
+
+(def deref
+  (fn* deref [o]
+    (-deref o)))
+
 ;; FIXME: crutches for devleopment. remove these later
 
 (def print
