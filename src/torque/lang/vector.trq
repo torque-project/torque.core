@@ -11,6 +11,7 @@
   (:use
     [torque.lang.protocols]
     [torque.lang.boot]
+    [torque.lang.exceptions]
     [torque.lang.flow]
     [torque.lang.let]
     [torque.lang.def]
@@ -20,7 +21,17 @@
   (:require
     [torque.lang.common.seq :as seq]))
 
-(declare extend-root extend-tail)
+(declare extend-root extend-tail do-assoc)
+
+(defn throw-out-of-bounds [n]
+  (throw
+    (ex-info (str "Out of bounds error when associating in vector: " n)
+      {:index n})))
+
+(defn throw-not-an-index [x]
+  (throw
+    (ex-info (str "Vector index has to be an integer: " x)
+      {:index x})))
 
 (deftype PersistentVector [meta cnt shift root tail]
 
@@ -45,31 +56,31 @@
       (extend-tail coll o)
       (extend-root coll o)))
 
-  ;; ILookup
-  ;; (-lookup [o k]
-  ;;   (-lookup o k nil))
-  ;; (-lookup [o k not-found]
-  ;;   (if (integer? k)
-  ;;     (-nth o k not-found)
-  ;;     not-found))
+  ILookup
+  (-lookup [o k]
+    (-lookup o k nil))
+  (-lookup [o k not-found]
+    (if (integer? k)
+      (-nth o k not-found)
+      not-found))
 
-  ;; IAssociative
-  ;; (-contains-key? [coll k]
-  ;;   false)
+  IAssociative
+  (-contains-key? [coll k]
+    false)
 
-  ;; (-assoc [coll k v]
-  ;;   (if (integer? k)
-  ;;     (if (and1 (<= 0 k) (< k cnt))
-  ;;       (if (<= (tail-off coll) k)
-  ;;         (let [new-tail (aclone tail)]
-  ;;           (aset new-tail (bit-and k 0x01f) v)
-  ;;           (new PersistentVector meta cnt shift root new-tail nil))
-  ;;         (let [new-root (do-assoc coll shift root k v)]
-  ;;           (new PersistentVector meta cnt shift new-root tail nil)))
-  ;;       (if (== k cnt)
-  ;;         (-conj coll v)
-  ;;         (throw-out-of-bounds k)))
-  ;;     (throw-not-an-index k)))
+  (-assoc [coll k v]
+    (if (integer? k)
+      (if (and1 (<= 0 k) (< k cnt))
+        (if (<= (tail-off coll) k)
+          (let [new-tail (aclone tail)]
+            (aset new-tail (bit-and k 0x01f) v)
+            (new PersistentVector meta cnt shift root new-tail))
+          (let [new-root (do-assoc coll shift root k v)]
+            (new PersistentVector meta cnt shift new-root tail)))
+        (if (== k cnt)
+          (-conj coll v)
+          (throw-out-of-bounds k)))
+      (throw-not-an-index k)))
 
   ISeqable
   (-seq [o]
@@ -175,6 +186,17 @@
       new-shift
       new-root
       (array o))))
+
+(defn ^:private do-assoc [v level node i val]
+  (let [ret (pv-clone-node node)]
+    (if (zero? level)
+      (do
+        (pv-aset ret (bit-and i 0x01f) val)
+        ret)
+      (let [subidx  (pv-index i level)
+            new-val (do-assoc v (- level 5) (pv-aget node subidx) i val)]
+        (pv-aset ret subidx new-val)
+        ret))))
 
 (defn empty-vector []
   (new PersistentVector nil 0 5 (empty-vector-node) (make-array 0)))

@@ -17,6 +17,11 @@
     (list 'let ['or# a]
           (list 'if 'or# 'or# b))))
 
+(def ^:macro and1
+  (fn and1 [a b]
+    (list 'let ['and# a]
+          (list 'if 'and# b 'and#))))
+
 (defn empty? [s]
   (or1 (nil? s) (not (seq s))))
 

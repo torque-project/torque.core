@@ -10,6 +10,10 @@
 (def satisfies?
   (fn* satisfies? [x y] (torque.core.builtin/satisfies? x y)))
 
+(def integer?
+  (fn* integer? [x]
+    (torque.core.builtin/integer? x)))
+
 (def array?
   (fn* array? [x]
     (torque.core.builtin/array? x)))
