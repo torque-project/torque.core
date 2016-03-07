@@ -21,4 +21,5 @@
     [torque.lang.predicates]
     [torque.lang.algo]
     [torque.lang.set]
-    [torque.lang.range]))
+    [torque.lang.range]
+    [torque.lang.atom]))
