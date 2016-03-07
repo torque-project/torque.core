@@ -1,0 +1,91 @@
+;; -*- mode: clojure; eval: (paredit-mode 1);-*-
+;;   Copyright (c) Rich Hickey. All rights reserved.
+;;   The use and distribution terms for this software are covered by the
+;;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;;   which can be found in the file epl-v10.html at the root of this distribution.
+;;   By using this software in any fashion, you are agreeing to be bound by
+;;   the terms of this license.
+;;   You must not remove this notice, or any other, from this software.
+
+(ns torque.lang.hierarchy
+  (:use
+    [torque.lang.protocols]
+    [torque.lang.boot]
+    [torque.lang.list]
+    [torque.lang.def]
+    [torque.lang.flow]
+    [torque.lang.seq]
+    [torque.lang.predicates]
+    [torque.lang.algo]
+    [torque.lang.atom]))
+
+(defn make-hierarchy []
+  {:parents     {}
+   :descendants {}
+   :ancestors   {}})
+
+(def global-hierarchy (atom (make-hierarchy)))
+
+(defn get-global-hierarchy []
+  global-hierarchy)
+
+(defn swap-global-hierarchy! [f & args]
+  (apply swap! (get-global-hierarchy) f args))
+
+(defn isa?
+  ([child parent]
+   (isa? @(get-global-hierarchy) child parent))
+  ([h child parent]
+   (or (= child parent)
+       (contains? (get (:ancestors h) child) parent)
+       (and (vector? parent) (vector? child)
+            (== (count parent) (count child))))))
+
+            ;; (loop [ret true
+            ;;        i   0]
+            ;;   (if (or (not ret) (== i (count parent)))
+            ;;     ret
+            ;;     (recur (isa? h (nth child i) (nth parent i))
+            ;;            (inc i))))
+
+(defn parents
+  ([tag]
+   (parents @(get-global-hierarchy) tag))
+  ([h tag]
+   (not-empty (get (:parents h) tag))))
+
+(defn ancestors
+  ([tag]
+   (ancestors @(get-global-hierarchy) tag))
+  ([h tag]
+   (not-empty (get (:ancestors h) tag))))
+
+(defn descendants
+  ([tag]
+   (descendants @(get-global-hierarchy) tag))
+  ([h tag]
+   (not-empty (get (:descendants h) tag))))
+
+(defn update-hierarchy [targets source sources target]
+  (reduce
+    (fn [ret k]
+      (assoc ret k
+             (reduce conj
+                     (get targets k #{})
+                     (cons target (get targets target)))))
+    targets
+    (cons source sources)))
+
+(defn derive
+  ([tag parent]
+   (swap-global-hierarchy! derive tag parent)
+   nil)
+  ([h tag parent]
+   (let [parents     (:parents h)
+         descendants (:descendants h)
+         ancestors   (:ancestors h)]
+     (if-not (contains? (get parents tag) parent)
+       {:parents     (assoc parents tag (conj (get parents tag #{}) parent))
+        :ancestors   (update-hierarchy ancestors tag descendants parent)
+        :descendants (update-hierarchy descendants parent ancestors tag)}
+       h))))

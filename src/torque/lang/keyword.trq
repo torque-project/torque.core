@@ -1,0 +1,42 @@
+;; -*- mode: clojure; eval: (paredit-mode 1);-*-
+;;   Copyright (c) Rich Hickey. All rights reserved.
+;;   The use and distribution terms for this software are covered by the
+;;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;;   which can be found in the file epl-v10.html at the root of this distribution.
+;;   By using this software in any fashion, you are agreeing to be bound by
+;;   the terms of this license.
+;;   You must not remove this notice, or any other, from this software.
+
+(ns torque.lang.keyword
+  (:use
+    [torque.lang.protocols]
+    [torque.lang.boot]
+    [torque.lang.def]
+    [torque.lang.string]))
+
+(deftype Keyword [namespace name fqn]
+
+  IPrintable
+  (-str [this] (str ":" fqn))
+
+  INamed
+  (-name [x] name)
+  (-namespace [x] namespace)
+
+  IEquiv
+  (-equiv [o other]
+    (if (instance? Keyword other)
+      (= fqn (. other fqn))
+      false))
+
+  IFn
+  (-invoke [this a]
+    (-invoke this a nil))
+  (-invoke [this a b]
+    (if (nil? a) b (-lookup a this b))))
+
+(defn keyword? [x]
+  (instance? Keyword x))
+
+(defn keyword [name]
+  (new Keyword nil name name))

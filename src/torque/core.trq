@@ -24,5 +24,7 @@
     [torque.lang.set]
     [torque.lang.range]
     [torque.lang.atom]
+    [torque.lang.symbol]
+    [torque.lang.keyword]
     ;; [torque.lang.hierarchy]
     ))
