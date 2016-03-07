@@ -1,0 +1,38 @@
+;; -*- mode: clojure;-*-
+
+(ns torque.lang.string
+  (:use
+    [torque.lang.protocols]
+    [torque.lang.boot]))
+
+(deftype String [data width]
+
+  IString
+
+  IPrintable
+  (-str [this] this)
+
+  ISerializable
+  (-bytes [o] data))
+
+(def string?
+  (fn* string? [x]
+    (satisfies? IString x)))
+
+(def string
+  (fn* string [b]
+    (new String b 1)))
+
+(def str
+  (fn* [& args]
+    (loop* [xs args
+            b  (binary)]
+      (if (not (nil? xs))
+        (let* [x        (let* [fst (-first xs)]
+                          (if fst
+                            fst
+                            "nil"))
+               next-bin (-bytes (-str x))]
+          (recur (-next xs)
+                 (binary b next-bin)))
+        (string b)))))
