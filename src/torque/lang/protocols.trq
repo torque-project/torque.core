@@ -171,5 +171,8 @@
 (defprotocol IString)
 ;; TODO: add common string operations
 
+(defprotocol ISerializable
+  (-bytes [o]))
+
 ;; marker protocol for defrecord
 (defprotocol IRecord)

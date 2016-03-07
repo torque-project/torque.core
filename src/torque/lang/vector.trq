@@ -24,9 +24,9 @@
 
 (deftype PersistentVector [meta cnt shift root tail]
 
-  ;; IPrintable
-  ;; (-str [this]
-  ;;   (seq/pr-str "[" "]" this))
+  IPrintable
+  (-str [this]
+    (seq/pr-str "[" "]" this))
 
   ICloneable
   (-clone [_]

@@ -21,10 +21,22 @@
     [torque.lang.indexed]
     [torque.lang.chunked]
     [torque.lang.vector]
+    [torque.lang.map]
     [torque.lang.squote]
     [torque.lang.predicates])
   (:require
     [torque.lang.common.seq :as seq]))
+
+(def dotimes
+  (fn dotimes
+    [binding & body]
+    (let [i (-nth binding 0)
+          n (-nth binding 1)]
+      `(let [n# ~n]
+         (loop* [~i 0]
+           (when (< ~i n#)
+             ~@body
+             (recur (inc ~i))))))))
 
 (defn identity [x]
   x)
@@ -69,15 +81,6 @@
         out))))
 
 ;; (defn filter
-;;   ([pred]
-;;    (fn [rf]
-;;      (fn
-;;        ([] (rf))
-;;        ([result] (rf result))
-;;        ([result input]
-;;         (if (pred input)
-;;           (rf result input)
-;;           result)))))
 ;;   ([pred coll]
 ;;    (lazy-seq
 ;;     (when-let [s (seq coll)]
@@ -128,16 +131,16 @@
   ([f & colls]
    (apply concat (apply map f colls))))
 
-;; (defn zipmap
-;;   [keys vals]
-;;   (loop [map {}
-;;          ks  (seq keys)
-;;          vs  (seq vals)]
-;;     (if (and ks vs)
-;;       (recur (assoc map (first ks) (first vs))
-;;              (next ks)
-;;              (next vs))
-;;       map)))
+(defn zipmap
+  [keys vals]
+  (loop [map {}
+         ks  (seq keys)
+         vs  (seq vals)]
+    (if (and ks vs)
+      (recur (assoc map (first ks) (first vs))
+             (next ks)
+             (next vs))
+      map)))
 
 (defn reduce
   ([f coll]
@@ -274,18 +277,18 @@
      ([a b c & ds]
       (apply f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c) ds)))))
 
-;; (defn select-keys
-;;   [map keyseq]
-;;     (loop [ret {} keys (seq keyseq)]
-;;       (if keys
-;;         (let [key   (first keys)
-;;               entry (get map key ::not-found)]
-;;           (recur
-;;            (if (not= entry ::not-found)
-;;              (assoc ret key entry)
-;;              ret)
-;;            (next keys)))
-;;         (with-meta ret (meta map)))))
+(defn select-keys [map keyseq]
+  (loop [ret  (hash-map)
+         keys (seq keyseq)]
+    (if keys
+      (let [key   (first keys)
+            entry (get map key ::not-found)]
+        (recur
+         (if (not= entry ::not-found)
+           (assoc ret key entry)
+           ret)
+         (next keys)))
+      (with-meta ret (meta map)))))
 
 (defn max [& xs]
   (loop [xs  xs

@@ -1,6 +1,7 @@
 (ns torque.lang.common.seq
   (:use
     [torque.lang.boot]
+    [torque.lang.string]
     [torque.lang.seq]))
 
 (defn equiv [x y]
@@ -37,13 +38,12 @@
          (recur nval (next xs)))
        val))))
 
-;; (defn pr-str [begin end coll]
-;;   (if (empty? coll)
-;;     (str begin end)
-;;     (str begin
-;;          (reduce
-;;           (fn [s x]
-;;             (str s " " (-str x)))
-;;           (first coll)
-;;           (rest coll))
-;;          end)))
+(defn pr-str [begin end coll]
+  (if (empty? coll)
+    (str begin end)
+    (str begin
+         (reduce
+           (fn [s x]
+             (str s " " x))
+           coll)
+         end)))

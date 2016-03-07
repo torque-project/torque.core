@@ -59,6 +59,10 @@
      `(let [or# ~x]
         (if or# or# (or ~@xs))))))
 
+(def ^:macro not=
+  (fn [a b]
+    `(not (= ~a ~b))))
+
 (defn complement
   [f]
   (fn complement

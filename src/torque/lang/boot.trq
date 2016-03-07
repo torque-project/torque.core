@@ -20,6 +20,9 @@
 (def instance?
   (fn* instance? [t x] (identical? (type x) t)))
 
+(def binary
+  (fn* binary [& vs] (torque.core.builtin/binary vs)))
+
 (def make-array
   (fn* make-array [n] (torque.core.builtin/make-array n)))
 
@@ -127,6 +130,12 @@
         nil)
       nil)))
 
+;; FIXME: crutches for devleopment. remove these later
+
 (def print
   (fn* [x]
     (torque.core.builtin/print x)))
+
+(def read
+  (fn* [x]
+    (torque.core.builtin/read x)))

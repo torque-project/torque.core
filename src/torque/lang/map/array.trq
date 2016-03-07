@@ -17,8 +17,7 @@
   (:require
     [torque.lang.common.seq :as seq]))
 
-;; TODO: needs keyword implementation in vm
-(def lookup-sentinel '::lookup-sentinel)
+(def lookup-sentinel ::lookup-sentinel)
 
 (defn array-map-index-of [m k]
   (let [arr (. m arr)
@@ -43,9 +42,9 @@
 
 (deftype PersistentArrayMapSeq [arr i meta]
 
-  ;; IPrintable
-  ;; (-str [this]
-  ;;   (seq/pr-str "(" ")" this))
+  IPrintable
+  (-str [this]
+    (seq/pr-str "(" ")" this))
 
   IMeta
   (-meta [o] meta)
@@ -91,9 +90,9 @@
 
 (deftype PersistentArrayMap [meta cnt arr]
 
-  ;; IPrintable
-  ;; (-str [this]
-  ;;   (seq/pr-str "{" "}" (new IndexedSeq arr 0)))
+  IPrintable
+  (-str [this]
+    (seq/pr-str "{" "}" (new IndexedSeq arr 0)))
 
   ICloneable
   (-clone [_]

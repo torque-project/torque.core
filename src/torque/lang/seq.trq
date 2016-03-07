@@ -12,6 +12,14 @@
     [torque.lang.protocols]
     [torque.lang.boot]))
 
+(def ^:macro or1
+  (fn or1 [a b]
+    (list 'let ['or# a]
+          (list 'if 'or# 'or# b))))
+
+(defn empty? [s]
+  (or1 (nil? s) (not (seq s))))
+
 (defn first [s]
   (when-not (nil? s)
     (if (satisfies? ISeq s)

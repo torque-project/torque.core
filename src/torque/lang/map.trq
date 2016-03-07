@@ -20,9 +20,9 @@
 
 (deftype KeySeq [mseq meta]
 
-  ;; IPrintable
-  ;; (-str [this]
-  ;;   (seq/pr-str "(" ")" this))
+  IPrintable
+  (-str [this]
+    (seq/pr-str "(" ")" this))
 
   IMeta
   (-meta [o] meta)
@@ -65,9 +65,9 @@
 
 (deftype ValSeq [mseq meta]
 
-  ;; IPrintable
-  ;; (-str [this]
-  ;;   (seq/pr-str "(" ")" this))
+  IPrintable
+  (-str [this]
+    (seq/pr-str "(" ")" this))
 
   IMeta
   (-meta [o] meta)

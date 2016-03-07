@@ -4,6 +4,7 @@
   (:inherit
     [torque.lang.protocols]
     [torque.lang.boot]
+    [torque.lang.string]
     [torque.lang.cons]
     [torque.lang.list]
     [torque.lang.flow]
