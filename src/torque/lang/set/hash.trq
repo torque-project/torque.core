@@ -1,0 +1,75 @@
+;; -*- mode: clojure; eval: (paredit-mode 1);-*-
+;;   Copyright (c) Rich Hickey. All rights reserved.
+;;   The use and distribution terms for this software are covered by the
+;;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;;   which can be found in the file epl-v10.html at the root of this distribution.
+;;   By using this software in any fashion, you are agreeing to be bound by
+;;   the terms of this license.
+;;   You must not remove this notice, or any other, from this software.
+
+(ns torque.lang.set.hash
+  (:use
+    [torque.lang.boot]
+    [torque.lang.def]
+    [torque.lang.map]
+    [torque.lang.predicates])
+  (:require
+    [torque.lang.common.seq :as seq]))
+
+(deftype PersistentHashSet [meta hash-map]
+
+  IPrintable
+  (-str [this]
+    (seq/pr-str "#{" "}" this))
+
+  ICloneable
+  (-clone [_]
+    (new PersistentHashSet meta hash-map))
+
+  IWithMeta
+  (-with-meta [coll meta]
+    (new PersistentHashSet meta hash-map))
+
+  IMeta
+  (-meta [coll] meta)
+
+  ICollection
+  (-conj [coll o]
+    (new PersistentHashSet meta (assoc hash-map o nil)))
+
+  IEquiv
+  (-equiv [o other]
+    (and
+      (set? other)
+      (== (count o) (count other))
+      (every? (fn [x] (contains? o x)) other)))
+
+  ISeqable
+  (-seq [o]
+    (keys hash-map))
+
+  ICounted
+  (-count [coll]
+    (-count hash-map))
+
+  ILookup
+  (-lookup [o k]
+    (-lookup o k nil))
+  (-lookup [o k not-found]
+    (if (-contains-key? hash-map k)
+      k
+      not-found))
+
+  ISet
+  (-disjoin [coll v]
+    (new PersistentHashSet meta (-dissoc hash-map v)))
+
+  ;; IFn
+  ;; (-invoke [this a]
+  ;;   (-lookup this a))
+  ;; (-invoke [this a b]
+  ;;   (-lookup this a b))
+  )
+
+(defn hash-set [& ks]
+  (reduce -conj (new PersistentHashSet nil (hash-map)) ks))

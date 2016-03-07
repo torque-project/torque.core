@@ -4,6 +4,7 @@
   (:inherit
     [torque.lang.protocols]
     [torque.lang.boot]
+    [torque.lang.limits]
     [torque.lang.string]
     [torque.lang.cons]
     [torque.lang.list]
@@ -18,4 +19,6 @@
     [torque.lang.map]
     [torque.lang.squote]
     [torque.lang.predicates]
-    [torque.lang.algo]))
+    [torque.lang.algo]
+    [torque.lang.set]
+    [torque.lang.range]))

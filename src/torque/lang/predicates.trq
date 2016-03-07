@@ -71,6 +71,16 @@
     ([x y] (not (f x y)))
     ([x y & zs] (not (apply f x y zs)))))
 
+(defn every?
+  [pred coll]
+  (cond
+    (nil? (seq coll))
+      true
+    (pred (first coll))
+      (recur pred (next coll))
+    :else
+      false))
+
 (defn some
   [pred coll]
   (when (seq coll)

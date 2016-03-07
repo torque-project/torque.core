@@ -168,3 +168,7 @@
        (if ks
          (recur (dissoc (first ks)) (next ks))
          ret)))))
+
+(defn contains?
+  [coll v]
+  (not (identical? (get coll v lookup-sentinel) lookup-sentinel)))

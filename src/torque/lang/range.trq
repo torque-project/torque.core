@@ -1,0 +1,113 @@
+;; -*- mode: clojure; eval: (paredit-mode 1);-*-
+;;   Copyright (c) Rich Hickey. All rights reserved.
+;;   The use and distribution terms for this software are covered by the
+;;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;;   which can be found in the file epl-v10.html at the root of this distribution.
+;;   By using this software in any fashion, you are agreeing to be bound by
+;;   the terms of this license.
+;;   You must not remove this notice, or any other, from this software.
+
+(ns torque.lang.range
+  (:use
+    [torque.lang.boot]
+    [torque.lang.limits]
+    [torque.lang.protocols]
+    [torque.lang.def]
+    [torque.lang.exceptions]
+    [torque.lang.seq])
+  (:require
+    [torque.lang.common.seq :as seq]))
+
+(declare ceil)
+
+(deftype Range [meta start end step]
+
+  IPrintable
+  (-str [this]
+    (seq/pr-str "(" ")" this))
+
+  ICloneable
+  (-clone [_]
+    (new Range meta start end step))
+
+  IWithMeta
+  (-with-meta [o meta]
+    (new Range meta start end step))
+
+  IMeta
+  (-meta [o] meta)
+
+  ISeqable
+  (-seq [o]
+    (if (pos? step)
+      (when (< start end)
+        o)
+      (when (> start end)
+        o)))
+
+  ISeq
+  (-first [this]
+    (when-not (nil? (-seq this))
+      start))
+  (-rest [this]
+    (if-not (nil? (-seq this))
+      (new Range meta (+ start step) end step)
+      ()))
+
+  INext
+  (-next [coll]
+    (if (pos? step)
+      (when (< (+ start step) end)
+        (new Range meta (+ start step) end step))
+      (when (> (+ start step) end)
+        (new Range meta (+ start step) end step))))
+
+  ICollection
+  (-conj [coll o] (cons o coll))
+
+  IEquiv
+  (-equiv [o other]
+    (seq/equiv o other))
+
+  ICounted
+  (-count [coll]
+    (if-not (-seq coll)
+      0
+      (ceil (/ (- end start) step))))
+
+  IIndexed
+  (-nth [coll n]
+    (if (< n (-count coll))
+      (+ start (* n step))
+      (if (and (> start end) (zero? step))
+        start
+        (throw (ex-info "Index out of bounds" {:n n})))))
+  (-nth [coll n not-found]
+    (if (< n (-count coll))
+      (+ start (* n step))
+      (if (and (> start end) (zero? step))
+        start
+        not-found)))
+
+  IReduce
+  (-reduce [coll f]
+    (seq/reduce coll f))
+  (-reduce [coll f init]
+    (loop [i   start
+           ret init]
+      (if (if (pos? step) (< i end) (> i end))
+        (let [ret (f ret i)]
+          (if (reduced? ret)
+            @ret
+            (recur (+ i step) ret)))
+        ret))))
+
+(defn range
+  ([]
+   (range 0 max-int 1))
+  ([end]
+   (range 0 end 1))
+  ([start end]
+   (range start end 1))
+  ([start end step]
+   (new Range nil start end step)))

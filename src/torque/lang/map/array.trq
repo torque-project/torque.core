@@ -70,7 +70,7 @@
 
   ISeq
   (-first [this]
-    [(aget arr i) (aget arr (inc i))])
+    (vector (aget arr i) (aget arr (inc i))))
 
   (-rest [this]
     (if (< i (- (alength arr) 2))

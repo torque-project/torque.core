@@ -32,7 +32,6 @@
                           (if fst
                             fst
                             "nil"))
-               next-bin (-bytes (-str x))]
-          (recur (-next xs)
-                 (binary b next-bin)))
+               next-bin (binary b (-bytes (-str x)))]
+          (recur (-next xs) next-bin))
         (string b)))))
