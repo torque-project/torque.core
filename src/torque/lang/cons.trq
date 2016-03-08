@@ -10,13 +10,25 @@
 (ns torque.lang.cons
   (:use
    [torque.lang.protocols]
-   [torque.lang.boot]))
+   [torque.lang.boot]
+   [torque.lang.string]))
 
 (deftype Cons [first rest meta]
 
-  ;; IPrintable
-  ;; (-str [this]
-  ;;   (seq/pr-str "(" ")" this))
+  IPrintable
+  (-str [this]
+    ;; TODO: use extend to use a common implementation
+    ;; with list
+    (str "("
+         (loop* [s ""
+                 f first
+                 r (seq rest)]
+           (if r
+             (recur (str s f " ")
+                    (-first r)
+                    (-next r))
+             (str s f)))
+         ")"))
 
   AList
 

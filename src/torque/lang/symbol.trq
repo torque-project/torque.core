@@ -11,7 +11,8 @@
   (:use
     [torque.lang.protocols]
     [torque.lang.boot]
-    [torque.lang.def]))
+    [torque.lang.def]
+    [torque.lang.atom]))
 
 (deftype Symbol [meta namespace name fqn]
 
@@ -40,3 +41,13 @@
 
 (defn symbol [name]
   (new Symbol nil nil name name))
+
+(def ^:private gensym-counter (atom 0))
+
+(defn gensym
+  ([]
+   (gensym "__SYM__"))
+  ([prefix-string]
+   (let [id  (swap! gensym-counter inc)
+         fqn (str prefix-string id)]
+     (symbol fqn))))

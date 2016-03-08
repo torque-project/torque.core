@@ -206,6 +206,11 @@
                    s)))]
     (lazy-seq (step pred coll))))
 
+(defn cycle [coll]
+  (lazy-seq
+   (when-let [s (seq coll)]
+     (concat s (cycle s)))))
+
 (defn split-at
   [n coll]
   [(take n coll) (drop n coll)])
@@ -222,6 +227,25 @@
 
 (defn iterate [f x]
   (cons x (lazy-seq (iterate f (f x)))))
+
+(defn interleave
+  ([c1 c2]
+   (lazy-seq
+    (let [s1 (seq c1) s2 (seq c2)]
+      (when (and s1 s2)
+        (let [step (interleave (rest s1) (rest s2))]
+          (cons (first s1)
+                (cons (first s2)
+                      step)))))))
+  ([c1 c2 & colls]
+   (lazy-seq
+    (let [ss (map seq (conj colls c2 c1))]
+      (when (every? identity ss)
+        (let [interleaved (apply interleave (map rest ss))]
+          (concat (map first ss) interleaved)))))))
+
+(defn interpose [sep coll]
+  (drop 1 (interleave (repeat sep) coll)))
 
 (defn partition
   ([n coll]
@@ -240,14 +264,26 @@
              (cons p (partition n step pad (drop step s)))
              (list (take n (concat p pad)))))))))
 
-(defn partition-by
-  [f coll]
+(defn partition-by [f coll]
   (lazy-seq
    (when-let [s (seq coll)]
-     (let [fst (first s)
-           fv (f fst)
-           run (cons fst (take-while (fn [x] (= fv (f x))) (next s)))]
+     (let [fst  (first s)
+           fv   (f fst)
+           rst  (take-while (fn [x] (= fv (f x))) (next s))
+           run  (cons fst rst)]
        (cons run (partition-by f (seq (drop (count run) s))))))))
+
+(defn tree-seq [branch? children root]
+  (let [walk (fn walk [node]
+               (lazy-seq
+                 (cons node
+                   (when (branch? node)
+                     (mapcat walk (children node))))))]
+    (walk root)))
+
+;; (defn flatten [x]
+;;   (filter (fn [x] (not (sequential? x)))
+;;           (rest (tree-seq sequential? seq x))))
 
 (defn fnil
   ([f x]
@@ -277,6 +313,22 @@
      ([a b c & ds]
       (apply f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c) ds)))))
 
+(defn get-in
+  ([m ks]
+   (get-in m ks nil))
+  ([m ks not-found]
+   (loop [sentinel lookup-sentinel
+          m        m
+          ks       (seq ks)]
+     (if ks
+       (if (not (satisfies? ILookup m))
+         not-found
+         (let [m (get m (first ks) sentinel)]
+           (if (identical? sentinel m)
+             not-found
+             (recur sentinel m (next ks)))))
+       m))))
+
 (defn select-keys [map keyseq]
   (loop [ret  (hash-map)
          keys (seq keyseq)]
@@ -289,6 +341,43 @@
            ret)
          (next keys)))
       (with-meta ret (meta map)))))
+
+(defn assoc-in [m ks v]
+  (let [k (first ks)]
+    (if-let [ks (next ks)]
+      (assoc m k (assoc-in (get m k) ks v))
+      (assoc m k v))))
+
+(defn update-in
+  ([m ks f]
+   (let [k (first ks)]
+     (if-let [ks (next ks)]
+       (assoc m k (update-in (get m k) ks f))
+       (assoc m k (f (get m k))))))
+  ([m ks f a]
+   (let [k (first ks)]
+     (if-let [ks (next ks)]
+       (assoc m k (update-in (get m k) ks f a))
+       (assoc m k (f (get m k) a)))))
+  ([m ks f a b]
+   (let [k (first ks)]
+     (if-let [ks (next ks)]
+       (assoc m k (update-in (get m k) ks f a b))
+       (assoc m k (f (get m k) a b)))))
+  ([m ks f a b c]
+   (let [k (first ks)]
+     (if-let [ks (next ks)]
+       (assoc m k (update-in (get m k) ks f a b c))
+       (assoc m k (f (get m k) a b c)))))
+  ([m ks f a b c & args]
+   (let [k (first ks)]
+     (if-let [ks (next ks)]
+       (assoc m k (apply update-in (get m k) ks f a b c args))
+       (assoc m k (apply f (get m k) a b c args))))))
+
+(defn merge [& maps]
+  (when (some identity maps)
+    (reduce (fn [m x] (conj (or m {}) x)) maps)))
 
 (defn max [& xs]
   (loop [xs  xs

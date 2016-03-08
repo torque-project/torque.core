@@ -42,3 +42,25 @@
                          (list form cur))]
           (recur threaded (next forms)))
         cur))))
+
+(def ^:macro as->
+  (fn [expr name & forms]
+    `(let [~name ~expr
+           ~@(interleave (repeat name) forms)]
+       ~name)))
+
+(def ^:macro some->
+  (fn [expr & forms]
+    (let [g     (gensym)
+          pstep (fn [step] `(if (nil? ~g) nil (-> ~g ~step)))]
+      `(let [~g ~expr
+             ~@(interleave (repeat g) (map pstep forms))]
+         ~g))))
+
+(def ^:macro some->>
+  (fn [expr & forms]
+    (let [g     (gensym)
+          pstep (fn [step] `(if (nil? ~g) nil (->> ~g ~step)))]
+      `(let [~g ~expr
+             ~@(interleave (repeat g) (map pstep forms))]
+         ~g))))
