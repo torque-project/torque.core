@@ -1,0 +1,164 @@
+;; -*- mode: clojure; eval: (paredit-mode 1);-*-
+;;   Copyright (c) Rich Hickey. All rights reserved.
+;;   The use and distribution terms for this software are covered by the
+;;   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
+;;   which can be found in the file epl-v10.html at the root of this distribution.
+;;   By using this software in any fashion, you are agreeing to be bound by
+;;   the terms of this license.
+;;   You must not remove this notice, or any other, from this software.
+
+(ns torque.lang.multimethod
+  (:use
+    [torque.lang.boot]
+    [torque.lang.protocols]
+    [torque.lang.def]
+    [torque.lang.flow]
+    [torque.lang.exceptions]
+    [torque.lang.predicates]
+    [torque.lang.algo]
+    [torque.lang.seq]
+    [torque.lang.map]
+    [torque.lang.atom]
+    [torque.lang.hierarchy]
+    [torque.lang.string]))
+
+(defprotocol IMultiFn
+  (-reset [mf])
+  (-add-method [mf dispatch-val method])
+  (-remove-method [mf dispatch-val])
+  (-prefer-method [mf dispatch-val dispatch-val-y])
+  (-get-method [mf dispatch-val])
+  (-methods [mf])
+  (-prefers [mf]))
+
+(defn throw-no-method [name dispatch-val]
+  (throw
+    (ex-info
+      (str "Couldn't find method for dispatch value " dispatch-val
+           " in method " name)
+      {:method       name
+       :dispatch-val dispatch-val})))
+
+(defn throw-dispatch-conflict [name dispatch-val conflict]
+  nil)
+
+(defn dominates [a b prefer-table]
+  (isa? a b))
+
+(defn find-best-entry [name dispatch-val method-table hierarchy prefer-table]
+  (reduce
+    (fn [be kv]
+      (let [k (first kv)]
+        (if (isa? @hierarchy dispatch-val k)
+          (let [be2 (if (or (nil? be)
+                            (dominates k (first be) prefer-table))
+                      kv
+                      be)]
+            (when-not (dominates (first be2) k prefer-table)
+              (throw-dispatch-conflict name dispatch-val (first be2)))
+            be2)
+          be)))
+    nil
+    @method-table))
+
+(defn find-best-method [mf dispatch-val]
+  (let [name         (. mf -name)
+        hierarchy    (. mf -hierarchy)
+        method-table (. mf -methods)
+        prefer-table (. mf -prefer-table)
+        best-entry   (find-best-entry name dispatch-val method-table hierarchy prefer-table)]
+    (second best-entry)))
+
+(deftype MultiFn [name dispatch-fn methods default-dispatch-val
+                  hierarchy prefer-table]
+
+  IMultiFn
+
+  (-reset [mf]
+    (reset! methods {}))
+
+  (-add-method [mf dispatch-val method]
+    (swap! methods assoc dispatch-val method)
+    mf)
+
+  (-remove-method [mf dispatch-val]
+    (swap! methods dissoc dispatch-val)
+    mf)
+
+  (-prefer-method [mf dispatch-val dispatch-val-y]
+    mf)
+
+  (-get-method [mf dispatch-val]
+    (or (get @methods dispatch-val)
+        (find-best-method mf dispatch-val)
+        (get @methods default-dispatch-val)))
+
+  (-methods [mf]
+    @methods)
+
+  (-prefers [mf]
+    @prefer-table)
+
+  IFn
+  (-invoke [this]
+    (let [dispatch-val (dispatch-fn)
+          target-fn (-get-method this dispatch-val)]
+      (when-not target-fn
+        (throw-no-method name dispatch-val))
+      (target-fn)))
+  (-invoke [this a]
+    (let [dispatch-val (dispatch-fn a)
+          target-fn    (-get-method this dispatch-val)]
+      (when-not target-fn
+        (throw-no-method name dispatch-val))
+      (target-fn a)))
+  (-invoke [this a b]
+    (let [dispatch-val (dispatch-fn a b)
+          target-fn (-get-method this dispatch-val)]
+      (when-not target-fn
+        (throw-no-method name dispatch-val))
+      (target-fn a b)))
+  (-invoke [this a b c]
+    (let [dispatch-val (dispatch-fn a b c)
+          target-fn (-get-method this dispatch-val)]
+      (when-not target-fn
+        (throw-no-method name dispatch-val))
+      (target-fn a b c)))
+  (-invoke [this a b c d]
+    (let [dispatch-val (dispatch-fn a b c d)
+          target-fn (-get-method this dispatch-val)]
+      (when-not target-fn
+        (throw-no-method name dispatch-val))
+      (target-fn a b c d)))
+  (-invoke [this a b c d e]
+    (let [dispatch-val (dispatch-fn a b c d e)
+          target-fn (-get-method this dispatch-val)]
+      (when-not target-fn
+        (throw-no-method name dispatch-val))
+      (target-fn a b c d e)))
+  (-invoke [this a b c d e f]
+    (let [dispatch-val (dispatch-fn a b c d e f)
+          target-fn (-get-method this dispatch-val)]
+      (when-not target-fn
+        (throw-no-method name dispatch-val))
+      (target-fn a b c d e f))))
+
+(def ^:macro defmulti
+  (fn defmulti [name dispatch-fn & options]
+    (let [options (apply array-map options)
+          default (torque.core/get options :default :default)]
+      `(def ~name
+         (let [methods#      (atom {})
+               prefer-table# (atom {})
+               global-h#     (torque.core/get-global-hierarchy)
+               hierarchy#    (get ~options :hierarchy global-h#)]
+           (new torque.lang.multimethod/MultiFn (quote ~name)
+                ~dispatch-fn
+                methods#
+                ~default
+                hierarchy#
+                prefer-table#))))))
+
+(def ^:macro defmethod
+  (fn defmethod [multifn dispatch-val & fn-tail]
+    `(-add-method ~multifn ~dispatch-val (fn ~@fn-tail))))

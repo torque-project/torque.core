@@ -11,6 +11,7 @@
   (:use
     [torque.lang.protocols]
     [torque.lang.boot]
+    [torque.lang.exceptions]
     [torque.lang.def]
     [torque.lang.flow]
     [torque.lang.predicates]

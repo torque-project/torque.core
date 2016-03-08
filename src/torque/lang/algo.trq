@@ -206,6 +206,12 @@
                    s)))]
     (lazy-seq (step pred coll))))
 
+(defn take-nth
+  ([n coll]
+   (lazy-seq
+    (when-let [s (seq coll)]
+      (cons (first s) (take-nth n (drop n s)))))))
+
 (defn cycle [coll]
   (lazy-seq
    (when-let [s (seq coll)]

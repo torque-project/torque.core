@@ -1,7 +1,8 @@
 (ns torque.lang.exceptions
   (:use
     [torque.lang.protocols]
-    [torque.lang.boot]))
+    [torque.lang.boot]
+    [torque.lang.string]))
 
 (deftype ExceptionInfo [message data cause])
 
@@ -26,3 +27,19 @@
 (def ^:macro throw
   (fn* throw [x]
     (list 'torque.core.builtin/throw x)))
+
+;; TODO: add *assert* flag
+;; (def ^:macro assert
+;;   (fn* assert
+;;     ([x]
+;;      (if (not x)
+;;        (throw
+;;          (ex-info (str "Assertion error: " x)
+;;                   {})))
+;;     ([x msg]
+;;      (if (not x)
+;;        (throw
+;;          (ex-info (str "Assertion error: "
+;;                        ~msg "\n"
+;;                        x)
+;;                   {})))))))
