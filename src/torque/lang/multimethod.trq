@@ -66,11 +66,16 @@
         hierarchy    (. mf -hierarchy)
         method-table (. mf -methods)
         prefer-table (. mf -prefer-table)
-        best-entry   (find-best-entry name dispatch-val method-table hierarchy prefer-table)]
+        best-entry   (find-best-entry name
+                       dispatch-val
+                       method-table
+                       hierarchy
+                       prefer-table)]
     (second best-entry)))
 
-(deftype MultiFn [name dispatch-fn methods default-dispatch-val
-                  hierarchy prefer-table]
+(deftype MultiFn
+  [name dispatch-fn methods default-dispatch-val
+   hierarchy prefer-table]
 
   IMultiFn
 
@@ -146,13 +151,13 @@
 (def ^:macro defmulti
   (fn defmulti [name dispatch-fn & options]
     (let [options (apply array-map options)
-          default (torque.core/get options :default :default)]
+          default (get options :default :default)]
       `(def ~name
          (let [methods#      (atom {})
                prefer-table# (atom {})
-               global-h#     (torque.core/get-global-hierarchy)
+               global-h#     (get-global-hierarchy)
                hierarchy#    (get ~options :hierarchy global-h#)]
-           (new torque.lang.multimethod/MultiFn (quote ~name)
+           (new MultiFn (quote ~name)
                 ~dispatch-fn
                 methods#
                 ~default

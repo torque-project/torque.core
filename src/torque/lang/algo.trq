@@ -23,16 +23,16 @@
     [torque.lang.vector]
     [torque.lang.map]
     [torque.lang.squote]
-    [torque.lang.predicates])
+    [torque.lang.predicates]
+    [torque.lang.symbol])
   (:require
     [torque.lang.common.seq :as seq]))
 
-(def dotimes
-  (fn dotimes
-    [binding & body]
+(def ^:macro dotimes
+  (fn dotimes [binding & body]
     (let [i (-nth binding 0)
           n (-nth binding 1)]
-      `(let [n# ~n]
+      `(let* [n# ~n]
          (loop* [~i 0]
            (when (< ~i n#)
              ~@body
@@ -40,6 +40,9 @@
 
 (defn identity [x]
   x)
+
+(defn constantly [x]
+  (fn [& args] x))
 
 (declare comp)
 
@@ -80,28 +83,28 @@
           (recur (conj out val) (next xs)))
         out))))
 
-;; (defn filter
-;;   ([pred coll]
-;;    (lazy-seq
-;;     (when-let [s (seq coll)]
-;;       (if (chunked-seq? s)
-;;         (let [c (chunk-first s)
-;;               size (count c)
-;;               b (chunk-buffer size)]
-;;           (dotimes [i size]
-;;             (when (pred (-nth c i))
-;;               (chunk-append b (-nth c i))))
-;;           (chunk-cons (chunk b) (filter pred (chunk-rest s))))
-;;         (let [f (first s) r (rest s)]
-;;           (if (pred f)
-;;             (cons f (filter pred r))
-;;             (filter pred r))))))))
+(defn filter
+  ([pred coll]
+   (lazy-seq
+    (when-let [s (seq coll)]
+      (if (chunked-seq? s)
+        (let [c (chunk-first s)
+              size (count c)
+              b (chunk-buffer size)]
+          (dotimes [i size]
+            (when (pred (-nth c i))
+              (chunk-append b (-nth c i))))
+          (chunk-cons (chunk b) (filter pred (chunk-rest s))))
+        (let [f (first s) r (rest s)]
+          (if (pred f)
+            (cons f (filter pred r))
+            (filter pred r))))))))
 
-;; (defn remove
-;;   ([pred]
-;;    (filter (complement pred)))
-;;   ([pred coll]
-;;    (filter (complement pred) coll)))
+(defn remove
+  ([pred]
+   (filter (complement pred)))
+  ([pred coll]
+   (filter (complement pred) coll)))
 
 (defn map
   ([f coll]
@@ -394,3 +397,14 @@
                res
                x))
       res)))
+
+(def ^:macro doto
+  (fn doto [x & forms]
+    (let [gx (gensym)]
+      `(let* [~gx ~x]
+         ~@(map (fn [f]
+                  (if (seq? f)
+                    `(~(first f) ~gx ~@(next f))
+                    `(~f ~gx)))
+                forms)
+         ~gx))))

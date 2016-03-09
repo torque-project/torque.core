@@ -43,6 +43,31 @@
           (recur threaded (next forms)))
         cur))))
 
+;; (def ^:macro cond->
+;;   (fn cond-> [expr & clauses]
+;; ;;    (assert (even? (count clauses)))
+;;     (let [g (gensym)
+;;           steps (map (fn [[test step]] `(if ~test (-> ~g ~step) ~g))
+;;                      (partition 2 clauses))]
+;;       `(let [~g ~expr
+;;              ~@(interleave (repeat g) (butlast steps))]
+;;          ~(if (empty? steps)
+;;             g
+;;             (last steps))))))
+
+;; (def ^:macro cond->>
+;;   (fn cond->> [expr & clauses]
+;; ;;    (assert (even? (count clauses)))
+;;     (let [g     (gensym)
+;;           steps (map (fn [[test step]]
+;;                        `(if ~test (->> ~g ~step) ~g))
+;;                      (partition 2 clauses))]
+;;       `(let [~g ~expr
+;;              ~@(interleave (repeat g) (butlast steps))]
+;;          ~(if (empty? steps)
+;;             g
+;;             (last steps))))))
+
 (def ^:macro as->
   (fn [expr name & forms]
     `(let [~name ~expr

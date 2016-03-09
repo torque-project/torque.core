@@ -23,9 +23,22 @@
 
 (deftype LazySeq [fn s]
 
-  ;; IPrintable
-  ;; (-str [this]
-  ;;   (seq/pr-str "(" ")" this))
+  IPrintable
+  (-str [this]
+    ;; TODO: use extend to use a common implementation
+    ;; with list and cons
+    (let [first (-first this)
+          rest  (-rest this)]
+      (str "("
+           (loop* [s ""
+                   f first
+                   r (seq rest)]
+                  (if r
+                    (recur (str s f " ")
+                           (-first r)
+                           (-next r))
+                    (str s f)))
+           ")")))
 
   ISeq
   (-first [this]
