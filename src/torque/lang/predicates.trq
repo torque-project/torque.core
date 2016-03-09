@@ -69,6 +69,9 @@
   (fn [a b]
     `(not (= ~a ~b))))
 
+(defn has-meta? [x]
+  (and (satisfies? IMeta x) (satisfies? IWithMeta x)))
+
 (defn complement
   [f]
   (fn complement
