@@ -42,6 +42,12 @@
 (defn symbol [name]
   (new Symbol nil nil name name))
 
+(defn name [x]
+  (-name x))
+
+(defn namespace [x]
+  (-namespace x))
+
 (def ^:private gensym-counter (atom 0))
 
 (defn gensym
