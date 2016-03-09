@@ -7,6 +7,9 @@
     [torque.lang.def]
     [torque.lang.let]))
 
+(defn number? [x]
+  (integer? x))
+
 (defn coll? [x]
   (satisfies? ICollection x))
 
