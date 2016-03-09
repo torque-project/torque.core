@@ -28,8 +28,6 @@
   (aset (. node arr) idx val))
 
 (defn pv-index [cnt level]
-  (print cnt)
-  (print level)
   (bit-and (bit-shift-right cnt level) 0x01f))
 
 (defn empty-vector-node []
