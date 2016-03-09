@@ -20,6 +20,11 @@
     ;; function definition
     (list 'def name (cons 'fn (cons name fdecl)))))
 
+(def ^:macro defmacro
+  (fn [name & body]
+    (list 'def (with-meta name {:macro true})
+          (cons 'fn (cons name body)))))
+
 (def ^:macro declare
   (fn* declare [& names]
     (cons 'do
