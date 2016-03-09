@@ -4,11 +4,11 @@
   (:inherit
     [torque.lang.protocols]
     [torque.lang.boot]
-    [torque.lang.exceptions]
     [torque.lang.limits]
     [torque.lang.string]
     [torque.lang.cons]
     [torque.lang.list]
+    [torque.lang.exceptions]
     [torque.lang.flow]
     [torque.lang.let]
     [torque.lang.def]
