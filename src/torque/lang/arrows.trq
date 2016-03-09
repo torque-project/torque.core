@@ -27,7 +27,7 @@
                          (with-meta `(~(first form) ~cur ~@(next form))
                            (meta form))
                          (list form cur))]
-          (recur threaded (next forms)))
+          (recur threaded (next fs)))
         cur))))
 
 (def ^:macro ->>
@@ -40,7 +40,7 @@
                          (with-meta `(~(first form) ~@(next form) ~cur)
                            (meta form))
                          (list form cur))]
-          (recur threaded (next forms)))
+          (recur threaded (next fs)))
         cur))))
 
 ;; (def ^:macro cond->
