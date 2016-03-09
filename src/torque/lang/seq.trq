@@ -66,3 +66,9 @@
 
 (defn nnext [s]
   (next (next s)))
+
+(defn last [coll]
+  (let [n (next coll)]
+    (if-not (nil? n)
+      (recur n)
+      (first coll))))
