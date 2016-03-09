@@ -28,3 +28,8 @@
 (def ^:macro loop
   (fn* loop [& forms]
     (cons 'loop* forms)))
+
+(def ^:macro binding
+  (fn* loop [& forms]
+    (cons 'binding* forms)))
+

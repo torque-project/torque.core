@@ -25,13 +25,12 @@
     (list 'def (with-meta name {:macro true})
           (cons 'fn (cons name body)))))
 
-(def ^:macro declare
-  (fn* declare [& names]
-    (cons 'do
-          (loop [xs    names
-                 forms (empty-list)]
-            (if xs
-              (recur (-next xs)
-                     (cons (list 'def (-first xs))
-                           forms))
-              forms)))))
+(defmacro declare [& names]
+  (cons 'do
+        (loop [xs    names
+               forms (empty-list)]
+          (if xs
+            (recur (-next xs)
+                   (cons (list 'def (-first xs))
+                         forms))
+            forms))))
