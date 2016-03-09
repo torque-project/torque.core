@@ -62,10 +62,10 @@
     @method-table))
 
 (defn find-best-method [mf dispatch-val]
-  (let [name         (. mf -name)
-        hierarchy    (. mf -hierarchy)
-        method-table (. mf -methods)
-        prefer-table (. mf -prefer-table)
+  (let [name         (. mf name)
+        hierarchy    (. mf hierarchy)
+        method-table (. mf methods)
+        prefer-table (. mf prefer-table)
         best-entry   (find-best-entry name
                        dispatch-val
                        method-table
