@@ -322,6 +322,12 @@
      ([a b c & ds]
       (apply f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c) ds)))))
 
+(defn find [coll k]
+  (when (and (not (nil? coll))
+             (associative? coll)
+             (contains? coll k))
+    [k (get coll k)]))
+
 (defn get-in
   ([m ks]
    (get-in m ks nil))
