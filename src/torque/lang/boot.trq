@@ -72,7 +72,7 @@
         (-equiv a b)
         false))))
 
-(def type? [x]
+(def type?
   (fn* type? [x]
     (torque.core.builtin/type? x)))
 
