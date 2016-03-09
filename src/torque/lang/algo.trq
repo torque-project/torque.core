@@ -71,6 +71,36 @@
         (seq/count coll)))
     0))
 
+(defn ^:private linear-traversal-nth
+  ([coll n]
+   (cond
+     (nil? coll)     (throw (ex-info "Index out of bounds" {}))
+     (zero? n)       (if (seq coll)
+                       (first coll)
+                       (throw (ex-info "Index out of bounds" {})))
+     (indexed? coll) (-nth coll n)
+     (seq coll)      (recur (next coll) (dec n))
+     :else           (throw (ex-info "Index out of bounds" {}))))
+  ([coll n not-found]
+   (cond
+     (nil? coll)     not-found
+     (zero? n)       (if (seq coll)
+                       (first coll)
+                       not-found)
+     (indexed? coll) (-nth coll n not-found)
+     (seq coll)      (recur (next coll) (dec n) not-found)
+     :else           not-found)))
+
+(defn nth
+  ([coll n]
+   (if (satisfies? IIndexed coll)
+     (-nth coll n)
+     (linear-traversal-nth coll n)))
+  ([coll n not-found]
+   (if (satisfies? IIndexed coll)
+     (-nth coll n not-found)
+     (linear-traversal-nth coll n not-found))))
+
 (defn conj
   ([]       [])
   ([coll]   coll)
