@@ -102,11 +102,12 @@
      (linear-traversal-nth coll n not-found))))
 
 (defn conj
-  ([]       [])
-  ([coll]   coll)
-  ([coll x] (-conj coll x))
-  ([coll & args]
-    (loop [out coll
+  ([] [])
+  ([coll] coll)
+  ([coll x]
+   (-conj coll x))
+  ([coll x & args]
+    (loop [out (conj coll x)
            xs  args]
       (if xs
         (let [val (-first xs)]
