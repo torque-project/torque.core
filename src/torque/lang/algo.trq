@@ -107,6 +107,8 @@
   ([coll x]
    (-conj coll x))
   ([coll x & args]
+   ;; FIXME: we don't support recur in variadic branches.
+   ;; replace this with something nicer later on
     (loop [out (conj coll x)
            xs  args]
       (if xs

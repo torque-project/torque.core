@@ -4,7 +4,10 @@
     [torque.lang.boot]
     [torque.lang.string]))
 
-(deftype ExceptionInfo [message data cause])
+(deftype ExceptionInfo [message data cause]
+
+  IPrintable
+  (-str [_] message))
 
 (def ex-info
   (fn* ex-info

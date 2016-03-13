@@ -148,22 +148,20 @@
         (throw-no-method name dispatch-val))
       (target-fn a b c d e f))))
 
-(def ^:macro defmulti
-  (fn defmulti [name dispatch-fn & options]
-    (let [options (apply array-map options)
-          default (get options :default :default)]
-      `(def ~name
-         (let [methods#      (atom {})
-               prefer-table# (atom {})
-               global-h#     (get-global-hierarchy)
-               hierarchy#    (get ~options :hierarchy global-h#)]
-           (new MultiFn (quote ~name)
-                ~dispatch-fn
-                methods#
-                ~default
-                hierarchy#
-                prefer-table#))))))
+(defmacro defmulti [name dispatch-fn & options]
+  (let [options (apply array-map options)
+        default (get options :default :default)]
+    `(def ~name
+       (let [methods#      (atom {})
+             prefer-table# (atom {})
+             global-h#     (get-global-hierarchy)
+             hierarchy#    (get ~options :hierarchy global-h#)]
+         (new MultiFn (quote ~name)
+              ~dispatch-fn
+              methods#
+              ~default
+              hierarchy#
+              prefer-table#)))))
 
-(def ^:macro defmethod
-  (fn defmethod [multifn dispatch-val & fn-tail]
-    `(-add-method ~multifn ~dispatch-val (fn ~@fn-tail))))
+(defmacro defmethod [multifn dispatch-val & fn-tail]
+  `(-add-method ~multifn ~dispatch-val (fn ~@fn-tail)))
