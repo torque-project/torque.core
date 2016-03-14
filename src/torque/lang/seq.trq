@@ -40,7 +40,7 @@
     (if (satisfies? ISeq coll)
       (-rest coll)
       (if-let [s (seq coll)]
-        (-rest coll)
+        (-rest s)
         ())
       ())))
 
