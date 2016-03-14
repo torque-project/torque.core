@@ -37,7 +37,8 @@
       false)))
 
 (defn symbol? [x]
-  (instance? Symbol x))
+  #?(:rev     (torque.core.builtin/symbol? x)
+     :default (instance? Symbol x)))
 
 (defn symbol [name]
   (new Symbol nil nil name name))
