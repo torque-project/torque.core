@@ -119,13 +119,13 @@
       (target-fn a)))
   (-invoke [this a b]
     (let [dispatch-val (dispatch-fn a b)
-          target-fn (-get-method this dispatch-val)]
+          target-fn    (-get-method this dispatch-val)]
       (when-not target-fn
         (throw-no-method name dispatch-val))
       (target-fn a b)))
   (-invoke [this a b c]
     (let [dispatch-val (dispatch-fn a b c)
-          target-fn (-get-method this dispatch-val)]
+          target-fn    (-get-method this dispatch-val)]
       (when-not target-fn
         (throw-no-method name dispatch-val))
       (target-fn a b c)))

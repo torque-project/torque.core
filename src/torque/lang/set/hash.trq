@@ -64,12 +64,11 @@
   (-disjoin [coll v]
     (new PersistentHashSet meta (-dissoc hash-map v)))
 
-  ;; IFn
-  ;; (-invoke [this a]
-  ;;   (-lookup this a))
-  ;; (-invoke [this a b]
-  ;;   (-lookup this a b))
-  )
+  IFn
+  (-invoke [this a]
+    (-lookup this a))
+  (-invoke [this a b]
+    (-lookup this a b)))
 
 (defn hash-set [& ks]
   (reduce -conj (new PersistentHashSet nil (hash-map)) ks))

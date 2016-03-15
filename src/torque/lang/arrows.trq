@@ -17,75 +17,72 @@
     [torque.lang.seq]
     [torque.lang.predicates]))
 
-(def ^:macro ->
-  (fn -> [x & forms]
-    (loop [cur x
-           fs  forms]
-      (if fs
-        (let [form     (first fs)
-              threaded (if (seq? form)
-                         (with-meta `(~(first form) ~cur ~@(next form))
-                           (meta form))
-                         (list form cur))]
-          (recur threaded (next fs)))
-        cur))))
+(defmacro -> [x & forms]
+  (loop [cur x
+         fs  forms]
+    (if fs
+      (let [form     (first fs)
+            threaded (if (seq? form)
+                       (with-meta `(~(first form) ~cur ~@(next form))
+                         (meta form))
+                       (list form cur))]
+        (recur threaded (next fs)))
+      cur)))
 
-(def ^:macro ->>
-  (fn ->> [x & forms]
-    (loop [cur x
-           fs  forms]
-      (if fs
-        (let [form     (first fs)
-              threaded (if (seq? form)
-                         (with-meta `(~(first form) ~@(next form) ~cur)
-                           (meta form))
-                         (list form cur))]
-          (recur threaded (next fs)))
-        cur))))
+(defmacro ->> [x & forms]
+  (loop [cur x
+         fs  forms]
+    (if fs
+      (let [form     (first fs)
+            threaded (if (seq? form)
+                       (with-meta `(~(first form) ~@(next form) ~cur)
+                         (meta form))
+                       (list form cur))]
+        (recur threaded (next fs)))
+      cur)))
 
-;; (def ^:macro cond->
-;;   (fn cond-> [expr & clauses]
-;; ;;    (assert (even? (count clauses)))
-;;     (let [g (gensym)
-;;           steps (map (fn [[test step]] `(if ~test (-> ~g ~step) ~g))
-;;                      (partition 2 clauses))]
-;;       `(let [~g ~expr
-;;              ~@(interleave (repeat g) (butlast steps))]
-;;          ~(if (empty? steps)
-;;             g
-;;             (last steps))))))
+(defmacro cond-> [expr & clauses]
+  (let [g     (gensym)
+        steps (map (fn [clause]
+                     (let [test (first clause)
+                           step (second clause)]
+                       `(if ~test (-> ~g ~step) ~g)))
+                   (partition 2 clauses))]
+    `(let [~g ~expr
+           ~@(interleave (repeat g) (butlast steps))]
+       ~(if (empty? steps)
+          g
+          (last steps)))))
 
-;; (def ^:macro cond->>
-;;   (fn cond->> [expr & clauses]
-;; ;;    (assert (even? (count clauses)))
-;;     (let [g     (gensym)
-;;           steps (map (fn [[test step]]
-;;                        `(if ~test (->> ~g ~step) ~g))
-;;                      (partition 2 clauses))]
-;;       `(let [~g ~expr
-;;              ~@(interleave (repeat g) (butlast steps))]
-;;          ~(if (empty? steps)
-;;             g
-;;             (last steps))))))
+(defmacro cond->> [expr & clauses]
+  ;;    (assert (even? (count clauses)))
+  (let [g     (gensym)
+        steps (map (fn [clause]
+                     (let [test (first clause)
+                           step (second clause)]
+                       `(if ~test (->> ~g ~step) ~g)))
+                   (partition 2 clauses))]
+    `(let [~g ~expr
+           ~@(interleave (repeat g) (butlast steps))]
+       ~(if (empty? steps)
+          g
+          (last steps)))))
 
-(def ^:macro as->
-  (fn [expr name & forms]
-    `(let [~name ~expr
-           ~@(interleave (repeat name) forms)]
-       ~name)))
+(defmacro as-> [expr name & forms]
+  `(let [~name ~expr
+         ~@(interleave (repeat name) forms)]
+     ~name))
 
-(def ^:macro some->
-  (fn [expr & forms]
-    (let [g     (gensym)
-          pstep (fn [step] `(if (nil? ~g) nil (-> ~g ~step)))]
-      `(let [~g ~expr
-             ~@(interleave (repeat g) (map pstep forms))]
-         ~g))))
+(defmacro some-> [expr & forms]
+  (let [g     (gensym)
+        pstep (fn [step] `(if (nil? ~g) nil (-> ~g ~step)))]
+    `(let [~g ~expr
+           ~@(interleave (repeat g) (map pstep forms))]
+       ~g)))
 
-(def ^:macro some->>
-  (fn [expr & forms]
-    (let [g     (gensym)
-          pstep (fn [step] `(if (nil? ~g) nil (->> ~g ~step)))]
-      `(let [~g ~expr
-             ~@(interleave (repeat g) (map pstep forms))]
-         ~g))))
+(defmacro some->> [expr & forms]
+  (let [g     (gensym)
+        pstep (fn [step] `(if (nil? ~g) nil (->> ~g ~step)))]
+    `(let [~g ~expr
+           ~@(interleave (repeat g) (map pstep forms))]
+       ~g)))
