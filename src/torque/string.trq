@@ -13,7 +13,7 @@
 (defn whitespace? [x]
   (== (isspace x) 1))
 
-(defn numeric? [x]
+(defn alpha-numeric? [x]
   (== (isalnum x) 1))
 
 (defn number? [x]
@@ -27,3 +27,25 @@
       (when-not (= start end)
         res))
     (parse-int (str s))))
+
+(defn at [s n]
+  #?(:rev
+     ;; during bootstrap stings are always of width 1
+     (bget (-bytes s) n)
+     ;; default implementation constructs char codes from
+     ;; string with a specific byte width
+     :default
+     (let [width (. s width)
+           data  (. s data)]
+       ;; FIXME: this ignores endinaess. we need a general solution for
+       ;; this. maybe it would be nice to have an endianess aware loop
+       ;; construct
+       (loop [out 0
+              i   0]
+         (if (< i width)
+           (recur (bit-or out
+                          (bit-shift-left
+                            (bget data (+ n i))
+                            i))
+                  (inc i))
+           out)))))

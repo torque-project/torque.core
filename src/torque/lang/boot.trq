@@ -27,6 +27,9 @@
 (def binary
   (fn* binary [& vs] (torque.core.builtin/binary vs)))
 
+(def bget
+  (fn* bget [a n] (torque.core.builtin/bget a n)))
+
 (def make-array
   (fn* make-array [n] (torque.core.builtin/make-array n)))
 
