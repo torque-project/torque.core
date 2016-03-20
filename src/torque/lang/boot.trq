@@ -89,7 +89,7 @@
   (fn* false? [x] (identical? x false)))
 
 (def zero?
-  (fn* zero? [x] (= x 0)))
+  (fn* zero? [x] (torque.core.builtin/== x 0)))
 
 (def pos?
   (fn* pos? [x] (> x 0)))
