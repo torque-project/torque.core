@@ -1,0 +1,28 @@
+;; -*- mode: clojure; eval: (paredit-mode 1);-*-
+
+(ns torque.string)
+
+(def libc (so* "c"))
+
+(def ^:private isspace (import* libc isspace :sint32 (:sint32)))
+(def ^:private isalnum (import* libc isalnum :sint32 (:sint32)))
+(def ^:private isdigit (import* libc isdigit :sint32 (:sint32)))
+
+(def strtoll (import* libc strtoll :sint64 (:ptr ^:out :ptr :sint32)))
+
+(defn whitespace? [x]
+  (== (isspace x) 1))
+
+(defn numeric? [x]
+  (== (isalnum x) 1))
+
+(defn number? [x]
+  (== (isdigit x) 1))
+
+(defn parse-int [s]
+  (if s
+    (let [start (-intptr (-bytes s))
+          end   0
+          res   (strtoll start end 0)]
+      (when-not (= start end)
+        res))))

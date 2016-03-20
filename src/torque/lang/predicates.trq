@@ -49,6 +49,9 @@
 (defn counted? [x]
   (satisfies? ICounted x))
 
+(defn printable? [x]
+  (satisfies? IPrintable x))
+
 (def ^:macro and
   (fn and
     ([]  true)
