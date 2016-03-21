@@ -16,7 +16,7 @@
 (defn alpha-numeric? [x]
   (== (isalnum x) 1))
 
-(defn number? [x]
+(defn digit? [x]
   (== (isdigit x) 1))
 
 (defn parse-int [s]
