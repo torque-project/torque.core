@@ -20,7 +20,7 @@
   (== (isdigit x) 1))
 
 (defn parse-int [s]
-  (if (and s (string? s))
+  (if (and s (or (string? s) (binary? s)))
     (let [start (-intptr (-bytes s))
           end   0
           res   (strtoll start end 0)]

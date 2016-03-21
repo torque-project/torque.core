@@ -30,7 +30,7 @@
   (fn* [& args]
     (if (not (nil? args))
       (loop* [xs (-next args)
-              b  (-bytes (-first args))]
+              b  (-bytes (-str (-first args)))]
         (if (not (nil? xs))
           (let* [x        (let* [fst (-first xs)]
                             (if fst

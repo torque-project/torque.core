@@ -11,7 +11,6 @@
   ;; tag protocol to hide the fact that there
   ;; are different types that act as lists
   AList
-  (-dummy [_])
 
   IPrintable
   (-str [this]
