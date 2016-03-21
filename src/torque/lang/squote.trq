@@ -20,7 +20,7 @@
 (defn ^:private collect [xs]
   (if-let [ys (next xs)]
     (cons (first xs) (collect ys))
-    (first xs)))
+    (seq (first xs))))
 
 (defn apply [f & args]
   (apply* f (collect args)))
