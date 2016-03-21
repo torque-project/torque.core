@@ -1,11 +1,11 @@
-;; -*- mode: clojure;-*-
+;; -*- mode: clojure; eval: (paredit-mode 1);-*-
 
 (ns torque.lang.string
   (:use
     [torque.lang.protocols]
     [torque.lang.boot]))
 
-(deftype String [data width]
+(deftype String [data width length]
 
   IString
 
@@ -13,7 +13,10 @@
   (-str [this] this)
 
   ISerializable
-  (-bytes [o] data))
+  (-bytes [o] data)
+
+  ICounted
+  (-count [s] length))
 
 (def string?
   (fn* string? [x]
@@ -21,7 +24,7 @@
 
 (def string
   (fn* string [b]
-    (new String b 1)))
+    (new String b 1 (blength b))))
 
 (def str
   (fn* [& args]
