@@ -141,7 +141,8 @@
 (defprotocol IVolatile
   (-vreset! [o new-value]))
 
-(defprotocol AList)
+(defprotocol AList
+  (-dummy [_]))
 
 (defprotocol IFn
   (-invoke

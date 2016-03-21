@@ -11,6 +11,7 @@
   ;; tag protocol to hide the fact that there
   ;; are different types that act as lists
   AList
+  (-dummy [_])
 
   IPrintable
   (-str [this]
@@ -82,14 +83,14 @@
     (new List nil nil nil 0)))
 
 (def ^:private reverse
-  (fn* [args]
+  (fn* [xs]
     (loop* [out (empty-list)
-            xs  args]
+            xs  xs]
       (if (not (nil? xs))
         (recur (-conj out (-first xs))
                (-next xs))
         out))))
 
 (def list
-  (fn* list [& args]
-    (reverse (reverse args))))
+  (fn* list [& xs]
+    (reverse (reverse xs))))
