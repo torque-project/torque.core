@@ -1,49 +1,55 @@
+;; -*- mode: clojure;-*-
+
 (ns torque.lang.common.seq
   (:use
     [torque.lang.boot]
-    [torque.lang.string]
-    [torque.lang.seq]))
+    [torque.lang.string]))
 
-(defn equiv [x y]
-  (when (satisfies? ISeqable y)
-    (loop [xs (seq x)
-           ys (seq y)]
-      (if (nil? xs)
-        (nil? ys)
-        (if (nil? ys)
-          false
-          (if (= (first xs) (first ys))
-            (recur (next xs) (next ys))
-            false))))))
+(def equiv
+  (fn* equiv [x y]
+    (if (satisfies? ISeqable y)
+      (loop* [xs (seq x)
+             ys (seq y)]
+        (if (nil? xs)
+          (nil? ys)
+          (if (nil? ys)
+            false
+            (if (= (-first xs) (-first ys))
+              (recur (-next xs) (-next ys))
+              false)))))))
 
-(defn count [coll]
-  (loop [s   (seq coll)
-         acc 0]
-    (if (satisfies? ICounted s)
-      (+ acc (-count s))
-      (if s
-        (recur (next s) (inc acc))
-        acc))))
+(def count
+  (fn* count [coll]
+    (loop* [s   (seq coll)
+            acc 0]
+      (if (satisfies? ICounted s)
+        (+ acc (-count s))
+        (if s
+          (recur (-next s) (inc acc))
+          acc)))))
 
-(defn reduce
-  ([f coll]
-    (if-let [s (seq coll)]
-      (reduce f (first s) (next s))
-      (f)))
-  ([f init coll]
-   (loop [val init
-          xs  (seq coll)]
-     (if xs
-       (let [nval (f val (first xs))]
-         (recur nval (next xs)))
-       val))))
+(def reduce
+  (fn* reduce
+    ([f coll]
+     (let* [s (seq coll)]
+       (if s
+         (reduce f (-first s) (-next s))
+         (f))))
+    ([f init coll]
+     (loop* [val init
+             xs  (seq coll)]
+       (if xs
+         (let* [nval (f val (-first xs))]
+           (recur nval (-next xs)))
+         val)))))
 
-(defn pr-str [begin end coll]
-  (if (empty? coll)
-    (str begin end)
-    (str begin
-         (reduce
-           (fn [s x]
-             (str s " " x))
-           coll)
-         end)))
+(def pr-str
+  (fn* pr-str [begin end coll]
+    (if (not (seq coll))
+      (str begin end)
+      (str begin
+           (reduce
+            (fn* [s x]
+              (str s " " x))
+            coll)
+           end))))

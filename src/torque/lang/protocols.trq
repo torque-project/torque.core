@@ -180,3 +180,6 @@
 
 ;; marker protocol for defrecord
 (defprotocol IRecord)
+
+(defprotocol IResource
+  (-dispose [_]))

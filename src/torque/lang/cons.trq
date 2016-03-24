@@ -9,26 +9,16 @@
 
 (ns torque.lang.cons
   (:use
-   [torque.lang.protocols]
-   [torque.lang.boot]
-   [torque.lang.string]))
+    [torque.lang.protocols]
+    [torque.lang.boot])
+  (:require
+    [torque.lang.common.seq :as seq]))
 
 (deftype Cons [first rest meta]
 
   IPrintable
   (-str [this]
-    ;; TODO: use extend to use a common implementation
-    ;; with list
-    (str "("
-         (loop* [s ""
-                 f first
-                 r (seq rest)]
-           (if r
-             (recur (str s f " ")
-                    (-first r)
-                    (-next r))
-             (str s f)))
-         ")"))
+    (seq/pr-str "(" ")" this))
 
   AList
 
@@ -61,19 +51,18 @@
   (-conj [coll o]
     (new Cons o coll meta))
 
-  ;; IEquiv
-  ;; (-equiv [o other]
-  ;;   (seq/equiv o other))
+  IEquiv
+  (-equiv [o other]
+    (seq/equiv o other))
 
   ISeqable
   (-seq [o] o)
 
-  ;; IReduce
-  ;; (-reduce [coll f]
-  ;;   (seq/reduce f coll))
-  ;; (-reduce [coll f init]
-  ;;   (seq/reduce f init coll))
-  )
+  IReduce
+  (-reduce [coll f]
+    (seq/reduce f coll))
+  (-reduce [coll f init]
+    (seq/reduce f init coll)))
 
 (def cons
   (fn* [x coll]
