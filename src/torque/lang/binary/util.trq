@@ -1,0 +1,13 @@
+(ns torque.lang.binary.util
+  (:use
+    [torque.lang.exceptions]))
+
+(defn throw-binary-width [b offset width]
+  (throw
+   (ex-info
+    (str "Reading " width
+         " bytes from binary at offset " offset
+         " exceeds binary length " (blength b))
+    {:width  width
+     :offset offset
+     :length (blength b)})))

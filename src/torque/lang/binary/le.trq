@@ -1,0 +1,90 @@
+(ns torque.lang.binary.le
+  (:use
+    [torque.lang.binary.util]))
+
+(def ^:private msb (bit-shift-left 0x1 7))
+
+(defn ^:private signed? [byte]
+  (== (bit-and byte msb) msb))
+
+;; (defmacro unroll [b bytes]
+;;   (loop [n   bytes
+;;          out '(bit-shift-left (bget ~b ~bytes) ~(* bytes 8))]
+;;     (if (> bytes n)
+;;       (recur (dec n)
+;;              `(bit-or (bit-shift-left )))
+;;       out)))
+
+(defn get-int16
+  "Get a 16 bit signed integer in little endian format at offset"
+  [b offset]
+  (if (<= (+ offset 2) (blength b))
+    (let [x (bget b offset)
+          y (bget b (inc offset))
+          n (bit-or x (bit-shift-left y 8))]
+      (if (signed? b)
+        (bit-or -65536 n)
+        n))
+    (throw-binary-width b offset 2)))
+
+(defn get-int32
+  "Get a 32 bit signed integer in little endian format at offset"
+  [b offset]
+  (if (<= (+ offset 4) (blength b))
+    (let [x (bget b offset)
+          y (bget b (+ offset 1))
+          v (bget b (+ offset 2))
+          w (bget b (+ offset 3))
+          n (bit-or
+              x
+              (bit-or
+                (bit-shift-left y 8)
+                (bit-or
+                  (bit-shift-left v 16)
+                  (bit-shift-left w 24))))]
+      (if (signed? w)
+        (bit-or -4294967296 n)
+        n))
+    (throw-binary-width b offset 4)))
+
+(defn get-int64
+  "Get a 32 bit signed integer in little endian format at offset"
+  [b offset]
+  (if (<= (+ offset 8) (blength b))
+    (bit-or
+      (bget b offset)
+      (bit-or
+        (bit-shift-left (bget b (+ offset 1)) 8)
+        (bit-or
+          (bit-shift-left (bget b (+ offset 2)) 16)
+          (bit-or
+            (bit-shift-left (bget b (+ offset 3)) 24)
+            (bit-or
+              (bit-shift-left (bget b (+ offset 4)) 32)
+              (bit-or
+                (bit-shift-left (bget b (+ offset 5)) 40)
+                (bit-or
+                  (bit-shift-left (bget b (+ offset 6)) 48)
+                  (bit-shift-left (bget b (+ offset 7)) 56))))))))
+    (throw-binary-width b offset 8)))
+
+(defn get-uint16
+  "Get a 16 bit signed integer in little endian format at offset"
+  [b offset]
+  (if (<= (+ offset 2) (blength b))
+    (bit-or (bget b offset)
+            (bit-shift-left (bget b (inc offset)) 8))
+    (throw-binary-width b offset 2)))
+
+(defn get-uint32
+  "Get a 16 bit signed integer in little endian format at offset"
+  [b offset]
+  (if (<= (+ offset 2) (blength b))
+    (bit-or
+      (bget b offset)
+      (bit-or
+        (bit-shift-left (bget b (+ offset 1)) 8)
+        (bit-or
+          (bit-shift-left (bget b (+ offset 2)) 16)
+          (bit-shift-left (bget b (+ offset 3)) 24))))
+    (throw-binary-width b offset 2)))

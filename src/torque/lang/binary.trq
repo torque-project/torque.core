@@ -1,0 +1,78 @@
+(ns torque.lang.binary
+  (:require
+    [torque.lang.binary.le :as le]
+    [torque.lang.binary.be :as be])
+  (:use
+    [torque.lang.binary.util]))
+
+(def libc (so* "c"))
+
+(def memcpy (import* libc memcpy :ptr (:ptr :ptr :sint64)))
+
+;; (deftype Binary [size ^:tail data]
+
+;;   IPrintable
+;;   (-str [_]
+;;     "#<binary>")
+
+;;   IPointerTarget
+;;   (-intptr [_] data))
+
+(defn get-byte [b offset]
+  (bget b offset))
+
+(defn get-int16
+  "Get a 16 bit signed integer in host byte order at offset"
+  [b offset]
+  #?(:byte-order/lsb (le/get-int16 b offset)
+     :byte-order/msb (be/get-int16 b offset)))
+
+(defn get-int32
+  "Get a 32 bit signed integer in host byte order at offset"
+  [b offset]
+  #?(:byte-order/lsb (le/get-int32 b offset)
+     :byte-order/msb (be/get-int32 b offset)))
+
+(defn get-int64
+  "Get a 64 bit signed integer in host byte order at offset"
+  [b offset]
+  #?(:byte-order/lsb (le/get-int64 b offset)
+     :byte-order/msb (be/get-int64 b offset)))
+
+(defn get-uint16
+  "Get a 16 bit unsigned integer in host byte order at offset"
+  [b offset]
+  #?(:byte-order/lsb (le/get-uint16 b offset)
+     :byte-order/msb (be/get-uint16 b offset)))
+
+(defn get-uint32
+  "Get a 32 bit unsigned integer in host byte order at offset"
+  [b offset]
+  #?(:byte-order/lsb (le/get-uint32 b offset)
+     :byte-order/msb (be/get-uint32 b offset)))
+
+(defn subb [b start end]
+  (let [length (- end start)]
+    (if (<= length (blength b))
+      (let [out (make-binary length)]
+        (memcpy (intptr out) (+ (intptr b) start) length)
+        out)
+      (throw-binary-width b start length))))
+
+;; TODO: this should have an extra parameter to read a string
+;; in any supported encoding
+(defn get-string
+  "Get a zerto terminated C string of at most max bytes
+   starting at offset"
+  [b offset max]
+  (let [length (blength b)
+        max    (if (< length max) length max)]
+    (if (< offset length)
+      (loop [n offset]
+        (if (< n max)
+          (let [x (bget b n)]
+            (if (== x \0)
+              (string (subb b offset n))
+              (recur (inc n))))
+          (string (subb b offset n))))
+      (throw-binary-width b offset length))))
