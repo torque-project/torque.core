@@ -29,4 +29,5 @@
     [torque.lang.atom]
     [torque.lang.hierarchy]
     [torque.lang.multimethod]
-    [torque.lang.binary]))
+    [torque.lang.binary]
+    [torque.lang.resource]))

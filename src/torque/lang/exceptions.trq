@@ -2,7 +2,8 @@
   (:use
     [torque.lang.protocols]
     [torque.lang.boot]
-    [torque.lang.string]))
+    [torque.lang.string]
+    [torque.lang.cons]))
 
 (deftype ExceptionInfo [message data cause]
 
@@ -30,6 +31,18 @@
 (def ^:macro throw
   (fn* throw [x]
     (list 'torque.core.builtin/throw x)))
+
+(def ^:macro try
+  (fn* [& body]
+    (if body
+      (let* [forms (loop* [xs    body
+                           forms '()]
+                     (if (-next xs)
+                       (recur (-next xs)
+                              (cons (-first xs) forms))
+                       [forms (-first xs)]))]
+        ;; TODO: do try*/catch* once it's implemented
+        (cons 'do (-nth forms 0))))))
 
 ;; TODO: add *assert* flag
 ;; (def ^:macro assert
