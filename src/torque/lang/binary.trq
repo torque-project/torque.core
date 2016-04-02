@@ -39,6 +39,8 @@
   #?(:byte-order/lsb (le/get-int64 b offset)
      :byte-order/msb (be/get-int64 b offset)))
 
+(def get-uint8 get-byte)
+
 (defn get-uint16
   "Get a 16 bit unsigned integer in host byte order at offset"
   [b offset]
