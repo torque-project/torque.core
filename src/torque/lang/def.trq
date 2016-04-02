@@ -16,9 +16,17 @@
 
 (def ^:macro defn
   (fn defn [name & fdecl]
-    ;; TODO: parse meta information and attach to
+    ;; TODO: parse all meta information and attach to
     ;; function definition
-    (list 'def name (cons 'fn (cons name fdecl)))))
+    (let [doc   (if (string? (-first fdecl))
+                  (-first fdecl)
+                  nil)
+          fdecl (if doc (-rest fdecl) fdecl)
+          m     (-conj
+                  {:name name}
+                  (when doc {:doc doc}))]
+      (list 'def name
+        (cons 'fn (cons name fdecl))))))
 
 (def ^:macro defmacro
   (fn [name & body]

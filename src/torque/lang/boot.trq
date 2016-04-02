@@ -31,6 +31,9 @@
 (def binary
   (fn* binary [& vs] (torque.core.builtin/binary vs)))
 
+(def make-binary
+  (fn* make-binary [n] (torque.core.builtin/make-binary n)))
+
 (def bget
   (fn* bget [a n] (torque.core.builtin/bget a n)))
 
@@ -139,6 +142,9 @@
 
 (def seq
   (fn* seq [x] (if x (-seq x) nil)))
+
+(def bytes  -bytes)
+(def intptr -intptr)
 
 (def with-meta
   (fn* [o meta]
