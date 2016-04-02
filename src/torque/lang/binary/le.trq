@@ -2,11 +2,6 @@
   (:use
     [torque.lang.binary.util]))
 
-(def ^:private msb (bit-shift-left 0x1 7))
-
-(defn ^:private signed? [byte]
-  (== (bit-and byte msb) msb))
-
 ;; (defmacro unroll [b bytes]
 ;;   (loop [n   bytes
 ;;          out '(bit-shift-left (bget ~b ~bytes) ~(* bytes 8))]

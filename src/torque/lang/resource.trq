@@ -1,0 +1,15 @@
+(ns torque.lang.resource
+  (:use
+    [torque.lang.protocols]
+    [torque.lang.exceptions]))
+
+(defmacro with-resource [binding & body]
+  (let [sym (nth binding 0)]
+    `(try
+       (let [~sym ~(nth binding 1)
+             out  (do ~@body)]
+         (-dispose ~sym)
+         out)
+       (catch e
+         (-dispose ~sym)
+         (throw e)))))

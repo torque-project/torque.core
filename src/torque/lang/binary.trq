@@ -21,6 +21,15 @@
 (defn get-byte [b offset]
   (bget b offset))
 
+(defn get-int8
+  "Get a 8 bit signed integer in host byte order at offset"
+  [b offset]
+  (if (< offset (blength b))
+    (if (signed? b)
+      (bit-or -127 (bget b offset))
+      (bget b offset))
+    (throw-binary-width b offset 1)))
+
 (defn get-int16
   "Get a 16 bit signed integer in host byte order at offset"
   [b offset]
