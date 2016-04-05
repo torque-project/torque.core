@@ -1,0 +1,6 @@
+(ns torque.ffi)
+
+(def ^:dynamic *errno* 0)
+
+;; errno codes
+(def ENOENT 2)
