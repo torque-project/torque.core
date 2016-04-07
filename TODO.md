@@ -1,4 +1,4 @@
-= TODO
+# TODO
 
 This lists some TODO items before clojure.core is fully implemented.
 
