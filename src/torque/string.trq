@@ -127,20 +127,21 @@
              (== (bget str-data n) pat-ch)  n
              :else (recur (inc n)))))))))
 
-(defn ^:private split-with-string [s pat off]
+(defn ^:private split-with-string [s pat off len]
   (let [l (length pat)]
     ;; get next index of pat, copy, repeat
     (lazy-seq
-     (let [n (index-of s off pat)]
-       (if (== n -1)
-         (list (subs s off))
-         (let [next (+ n l)]
-           (->> (split-with-string s pat next)
-                (cons (subs s off n)))))))))
+      (let [n (index-of s off pat)]
+        (if (== n -1)
+          (when (< off len)
+            (list (subs s off)))
+          (let [next (+ n l)]
+            (->> (split-with-string s pat next)
+                 (cons (subs s off n)))))))))
 
 (defn split [s pat]
   (cond
-    (string? pat) (split-with-string s pat 0)
+    (string? pat) (split-with-string s pat 0 (length s))
     :else []))
 
 (defn join
