@@ -136,7 +136,7 @@
           (when (< off len)
             (list (subs s off)))
           (let [next (+ n l)]
-            (->> (split-with-string s pat next)
+            (->> (split-with-string s pat next len)
                  (cons (subs s off n)))))))))
 
 (defn split [s pat]
