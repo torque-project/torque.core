@@ -13,6 +13,9 @@
 (defn number? [x]
   (integer? x))
 
+(defn pointer? [x]
+  (integer? x))
+
 (defn coll? [x]
   (satisfies? ICollection x))
 

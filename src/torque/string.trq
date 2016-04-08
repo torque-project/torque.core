@@ -2,13 +2,15 @@
 
 (ns torque.string)
 
-(def libc (so* "c"))
+(def ^:private libc (so* "c"))
+
+;; ctype API
 
 (def ^:private isspace (import* libc isspace :sint32 (:sint32)))
 (def ^:private isalnum (import* libc isalnum :sint32 (:sint32)))
 (def ^:private isdigit (import* libc isdigit :sint32 (:sint32)))
 
-(def strtoll (import* libc strtoll :sint64 (:ptr ^:out :ptr :sint32)))
+(def ^:private strtoll (import* libc strtoll :sint64 (:ptr ^:out :ptr :sint32)))
 
 (defn whitespace? [x]
   (== (isspace x) 1))
@@ -21,30 +23,128 @@
 
 (defn parse-int [s]
   (if (and s (or (string? s) (binary? s)))
-    (let [start (-intptr (-bytes s))
+    (let [start (intptr s)
           end   0
           res   (strtoll start end 0)]
       (when-not (= start end)
         res))))
 
-(defn at [s n]
+(defn ^:private next-char [data off length]
+  (when (< off length)
+    (loop [n   (inc off)]
+      (if (and (< n length)
+               (== (bit-and (bget data n) 0xc0) 0x80))
+        (recur (inc n))
+        n))))
+
+(defn ^:private offset [data start n]
+  (let [length (blength data)]
+    (loop [i   0
+           off start]
+      (when (< off length)
+        (if (< i n)
+          (recur (inc i) (next-char data off length))
+          off)))))
+
+(defn ^:private length [s]
+  (let [data (bytes s)
+        size (blength data)]
+    (loop [out 0
+           off 0]
+      (if-let [next (next-char data off size)]
+        (recur (inc out) next)
+        out))))
+
+(defn at
+  "Gets the utf-8 char at position n. Note that this is not
+  the same as getting the nth byte from the string. This function
+  is linear and not constant. Since utf-8 is compatible with ASCII
+  this function may do too much for your use case."
+  [s n]
   #?(:rev
      ;; during bootstrap stings are always of width 1
-     (bget (-bytes s) n)
+     (bget (bytes s) n)
      ;; default implementation constructs char codes from
      ;; string with a specific byte width
      :default
-     (let [width (. s width)
-           data  (. s data)]
-       ;; FIXME: this ignores endinaess. we need a general solution for
-       ;; this. maybe it would be nice to have an endianess aware loop
-       ;; construct
-       (loop [out 0
-              i   0]
-         (if (< i width)
-           (recur (bit-or out
-                          (bit-shift-left
-                            (bget data (+ n i))
-                            i))
-                  (inc i))
-           out)))))
+     (let [data   (bytes s)
+           length (blength data)]
+       (loop [i   0
+              off 0]
+         (if (< i n)
+           (recur (inc i) (next-char data off length))
+           (let [next (- (next-char data off length) off)
+                 data (bytes s)]
+             (loop [m   1
+                    out (bget data off)]
+               (if (< m next)
+                 (recur (inc m)
+                        (-> (bget data (+ off m))
+                            (bit-shift-left (* m 8))
+                            (bit-or out)))
+                 out))))))))
+
+(defn subs
+  ([s start]
+   (subs s start -1))
+  ([s start end]
+   (let [data   (bytes s)
+         length (- end start)
+         start  (offset data 0 start)
+         end    (if (< end 0)
+                  (blength data)
+                  (or (offset data start length) (blength data)))]
+     (when start
+       (string (subb data start end))))))
+
+(defn starts-with? [s substr]
+  (and s substr
+       (bcompare (bytes s) (bytes substr))))
+
+(defn ends-with? [s substr]
+  (and s substr
+       (let [a    (bytes s)
+             b    (bytes substr)
+             dist (- (blength a) (blength b))]
+         (and (>= dist 0) (bcompare a b dist)))))
+
+(defn index-of
+  ([s pat]
+   (s 0 pat))
+  ([s off pat]
+   (let [str-data   (bytes s)
+         pat-data   (bytes pat)
+         str-length (blength str-data)
+         pat-length (blength pat-data)]
+     (if (== pat-length 1)
+       ;; revert to linear search if pattern length is 1
+       ;; this would probably even make sense for patterns
+       ;; smaller than word length
+       (let [pat-ch (bget pat-data 0)]
+         (loop [n off]
+           (cond
+             (>= n str-length)             -1
+             (== (bget str-data n) pat-ch)  n
+             :else (recur (inc n)))))))))
+
+(defn ^:private split-with-string [s pat off]
+  (let [l (length pat)]
+    ;; get next index of pat, copy, repeat
+    (lazy-seq
+     (let [n (index-of s off pat)]
+       (if (== n -1)
+         (list (subs s off))
+         (let [next (+ n l)]
+           (->> (split-with-string s pat next)
+                (cons (subs s off n)))))))))
+
+(defn split [s pat]
+  (cond
+    (string? pat) (split-with-string s pat 0)
+    :else []))
+
+(defn join
+  ([coll]
+   (join "" coll))
+  ([sep coll]
+   (apply str (interpose sep coll))))

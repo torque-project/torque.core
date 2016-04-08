@@ -5,18 +5,43 @@
   (:use
     [torque.lang.binary.util]))
 
-(def libc (so* "c"))
+(def ^:private libc (so* "c"))
 
-(def memcpy (import* libc memcpy :ptr (:ptr :ptr :sint64)))
+(def ^:private memcpy (import* libc memcpy :ptr (:ptr :ptr :sint64)))
+(def ^:private bcmp   (import* libc bcmp :ptr (:ptr :ptr :sint64)))
 
-;; (deftype Binary [size ^:tail data]
+;; (deftype Binary [size data]
 
 ;;   IPrintable
 ;;   (-str [_]
 ;;     "#<binary>")
 
 ;;   IPointerTarget
-;;   (-intptr [_] data))
+;;   (-intptr [this] data))
+
+;; (defn make-binary [size]
+;;   (if (pos? size)
+;;     (let [b (new Binary size nil :tail size)]
+;;       (set! b data (tail-of b))
+;;       b)
+;;     (throw
+;;       (ex-info "size should be positive"
+;;         {:size size}))))
+
+;; (defn from-ptr
+;;   "Create a binary from a pointer argument.
+;;    The size of the binary is supplied as the second argument.
+;;    Since there are no check to verify the size argument, this makes
+;;    this call inherently unsafe to use."
+;;   [ptr size]
+;;   (if (pointer? ptr)
+;;     (when-not (== ptr 0)
+;;       (let [out (make-binary 0 nil)]
+;;         (set! out size size)
+;;         (set! out data ptr)))
+;;     (throw
+;;       (ex-info "from-ptr should be called with an intptr as first argument"
+;;         {}))))
 
 (defn get-byte [b offset]
   (bget b offset))
@@ -73,7 +98,7 @@
 ;; TODO: this should have an extra parameter to read a string
 ;; in any supported encoding
 (defn get-string
-  "Get a zerto terminated C string of at most max bytes
+  "Get a zero terminated C string of at most max bytes
    starting at offset"
   [b offset max]
   (let [length (blength b)
@@ -87,3 +112,17 @@
               (recur (inc n))))
           (string (subb b offset n))))
       (throw-binary-width b offset length))))
+
+(defn bcompare
+  "Compare to binaries, returning true if the bytes b's bytes
+   are identical to a' bytes at off.
+   If off + (blength b) > (blength a) false is returned"
+  ([a b]
+   (bcompare a b 0))
+  ([a b off]
+   (if (and a b)
+     (if (<= (+ (blength b) off) (blength a))
+       (== (bcmp (+ (intptr a) off) (intptr b) (blength a)) 0)
+       false))
+   ;; TODO: throw invalid arg
+   ))
