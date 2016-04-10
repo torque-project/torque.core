@@ -89,6 +89,9 @@
         (array-seq tail)
         (chunked-seq o (first-array-for-longvec o) 0 0))))
 
+  IVector
+  (-assoc-n [coll n val])
+
   ICounted
   (-count [coll] cnt)
 

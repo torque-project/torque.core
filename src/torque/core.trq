@@ -31,3 +31,6 @@
     [torque.lang.multimethod]
     [torque.lang.binary]
     [torque.lang.resource]))
+
+(defn println [& args]
+  (print (apply str (interpose " " args))))

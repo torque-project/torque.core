@@ -2,5 +2,25 @@
 
 (def ^:dynamic *errno* 0)
 
+(def libc (so* "c"))
+
+(def ^:private strerr (import* libc strerror :string (:sint32)))
+
 ;; errno codes
 (def ENOENT 2)
+
+(defn enoent? []
+  (== *errno* ENOENT))
+
+(defn system-error? []
+  (> *errno* 0))
+
+(defn not-null [p]
+  (when-not (zero? p) p))
+
+(defn ^:private throw-system-error [m]
+  (when (system-error?)
+    (throw
+     (->> (merge m {:type :system :errno *errno*})
+          (ex-info (or (strerr *errno*)
+                       (str "Unknown system error: " *errno*)))))))
