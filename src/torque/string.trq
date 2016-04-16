@@ -140,9 +140,10 @@
                  (cons (subs s off n)))))))))
 
 (defn split [s pat]
-  (cond
-    (string? pat) (split-with-string s pat 0 (length s))
-    :else []))
+  (when s
+    (cond
+      (string? pat) (split-with-string s pat 0 (length s))
+      :else [])))
 
 (defn join
   ([coll]
