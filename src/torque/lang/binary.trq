@@ -1,14 +1,15 @@
 (ns torque.lang.binary
   (:require
     [torque.lang.binary.le :as le]
-    [torque.lang.binary.be :as be])
+    [torque.lang.binary.be :as be]
+    [torque.ffi :as ffi])
   (:use
     [torque.lang.binary.util]))
 
-(def ^:private libc (so* "c"))
+(def ^:private libc (ffi/so "c"))
 
-(def ^:private memcpy (import* libc memcpy :ptr (:ptr :ptr :sint64)))
-(def ^:private bcmp   (import* libc bcmp :ptr (:ptr :ptr :sint64)))
+(ffi/defimport memcpy libc memcpy :ptr [:ptr :ptr :sint64])
+(ffi/defimport bcmp libc bcmp :ptr [:ptr :ptr :sint64])
 
 ;; (deftype Binary [size data]
 
@@ -107,7 +108,7 @@
       (loop [n offset]
         (if (< n max)
           (let [x (bget b n)]
-            (if (== x \0)
+            (if (== x 0)
               (string (subb b offset n))
               (recur (inc n))))
           (string (subb b offset n))))

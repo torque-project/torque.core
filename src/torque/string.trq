@@ -1,16 +1,17 @@
 ;; -*- mode: clojure; eval: (paredit-mode 1);-*-
 
-(ns torque.string)
+(ns torque.string
+  (:require [torque.ffi :as ffi]))
 
-(def ^:private libc (so* "c"))
+(def ^:private libc (ffi/so "c"))
 
 ;; ctype API
 
-(def ^:private isspace (import* libc isspace :sint32 (:sint32)))
-(def ^:private isalnum (import* libc isalnum :sint32 (:sint32)))
-(def ^:private isdigit (import* libc isdigit :sint32 (:sint32)))
+(ffi/defimport isspace libc isspace :sint32 [:sint32])
+(ffi/defimport isalnum libc isalnum :sint32 [:sint32])
+(ffi/defimport isdigit libc isdigit :sint32 [:sint32])
 
-(def ^:private strtoll (import* libc strtoll :sint64 (:ptr ^:out :ptr :sint32)))
+(ffi/defimport strtoll libc strtoll :sint64 [:ptr ^:out :ptr :sint32])
 
 (defn whitespace? [x]
   (== (isspace x) 1))

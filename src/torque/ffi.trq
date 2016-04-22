@@ -2,14 +2,30 @@
 
 (def ^:dynamic *errno* 0)
 
-(def libc (so* "c"))
+(defmacro so
+  ([]
+   `(so* 0))
+  ([name]
+   `(so* ~name)))
 
-(def ^:private strerr (import* libc strerror :string (:sint32)))
+(defmacro import [lib sym]
+  `(import* ~lib ~sym))
 
-(def ^:private malloc (import libc malloc :ptr (:uint64)))
-(def ^:private free   (import libc free :void (:ptr)))
+(defmacro defimport [name lib sym ret args]
+  (let [syms (mapv (fn [x] (gensym "arg")) args)
+        name (with-meta name {:private true})]
+    `(let [ptr# (import ~lib ~sym)]
+       (def ~name
+         (fn ~name ~syms
+           (invoke* ptr# ~ret ~args ~@syms))))))
 
-(def ^:private memcpy (import* libc memcpy :ptr (:ptr :ptr :uint64)))
+(def ^:private libc (so "c"))
+
+(defimport strerr libc strerror :string [:sint32])
+(defimport malloc libc malloc :ptr [:uint64])
+(defimport free libc free :void [:ptr])
+
+(defimport memcpy libc memcpy :ptr [:ptr :ptr :uint64])
 
 ;; errno codes
 (def ENOENT 2)
@@ -31,7 +47,7 @@
                        (str "Unknown system error: " *errno*)))))))
 
 (defn throw-null-pointer [p]
-  (when (zero p)
+  (when (zero? p)
     (throw (ex-info "Null pointer reference detected" {}))))
 
 (defn throw-neg-size [n]
@@ -41,7 +57,7 @@
 (deftype MemoryResource [p]
   IResource
   (-dispose [this]
-    (whena (and p (not-null p))
+    (when (and p (not-null p))
       (free p)
       (set! this p nil)))
 

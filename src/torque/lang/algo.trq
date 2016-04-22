@@ -46,6 +46,10 @@
 
 (declare comp)
 
+(defn partial [f & fixed]
+  (fn [& args]
+    (apply f (concat fixed args))))
+
 ;; (defn comp
 ;;   ([] identity)
 ;;   ([f] f)

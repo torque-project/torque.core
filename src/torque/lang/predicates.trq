@@ -71,12 +71,18 @@
      `(let [or# ~x]
         (if or# or# (or ~@xs))))))
 
+(defn named? [x]
+  (or (satisfies? INamed x) (string? x)))
+
 (def ^:macro not=
   (fn [a b]
     `(not (= ~a ~b))))
 
 (defn has-meta? [x]
   (and (satisfies? IMeta x) (satisfies? IWithMeta x)))
+
+(defn boolean? [x]
+  (and (not (nil? x)) (or (identical? x true) (identical? x false))))
 
 (defn even? [x]
   (== (bit-and x 0x1) 0))

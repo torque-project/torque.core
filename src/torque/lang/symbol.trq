@@ -44,7 +44,10 @@
   (new Symbol nil nil name name))
 
 (defn name [x]
-  (-name x))
+  (if (satisfies? INamed x)
+    (-name x)
+    (when (string? x)
+      x)))
 
 (defn namespace [x]
   (-namespace x))
