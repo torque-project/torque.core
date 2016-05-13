@@ -1,0 +1,10 @@
+(ns torque.string-test
+  (:require [torque.string :as str])
+  (:use [torque.test]))
+
+(deftest join
+  (is (= "123"
+         (str/join [1 2 3])))
+  (is (= "foo, bar"
+         (str/join ", "
+                   ["foo" 'bar]))))
