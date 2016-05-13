@@ -3,6 +3,11 @@
 
 (def all-tests (atom {}))
 
+(def report (atom {}))
+
+(defn inc-in-report [key]
+  (swap! report update key (fnil inc 0)))
+
 (def ^:dynamic *current-test-path* [])
 
 (defn with-added-test-path [f & path]
@@ -12,6 +17,7 @@
 
 (defmacro deftest [name & body]
   `(let [test-fn# (fn []
+                    (inc-in-report :tests)
                     (with-added-test-path (fn []
                                             ~@body)
                       ~(str *ns*)
@@ -26,7 +32,9 @@
     ~@body))
 
 (defn check-is [expr res msg]
+  (inc-in-report :assertions)
   (when-not res
+    (inc-in-report :failures)
     (println "\nTEST FAILURE in"
              (str/join " > "
                        *current-test-path*))
@@ -43,8 +51,29 @@
   ([expr msg]
    `(check-is '~expr ~expr ~msg)))
 
+(defn pluralize [base-str number]
+  (if (= number 1)
+    base-str
+    (str base-str "s")))
+
+(defn print-report []
+  (let [test-count (or (:tests @report) 0)
+        tests-str (pluralize "test" test-count)
+        assertion-count (or (:assertions @report) 0)
+        assertions-str (pluralize "assertion" assertion-count)
+        failure-count (or (:failures @report) 0)
+        failures-str (pluralize "failure" failure-count)]
+    (println "\nRan" test-count tests-str
+             "with" assertion-count (str assertions-str "\n"))
+    (if (pos? failure-count)
+      (println failure-count failures-str)
+      (println "All tests successful"))
+    (println)))
+
 (defn run-all-tests []
   (println "\nRunning tests...")
+  (reset! report {})
   (doseq [kv @all-tests]
     (doseq [test (second kv)]
-      (test))))
+      (test)))
+  (print-report))
