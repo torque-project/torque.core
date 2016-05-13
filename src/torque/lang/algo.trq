@@ -29,6 +29,10 @@
     [torque.lang.common.seq :as seq]))
 
 (def ^:macro dotimes
+  "bindings => name n
+
+  Repeatedly executes body (presumably for side-effects) with name
+  bound to integers from 0 through n-1."
   (fn dotimes [binding & body]
     (let [i (-nth binding 0)
           n (-nth binding 1)]
@@ -37,6 +41,19 @@
            (when (< ~i n#)
              ~@body
              (recur (inc ~i))))))))
+
+(def ^:macro doseq
+  "Repeatedly executes body (presumably for side-effects) with
+  bindings and filtering as provided by \"for\".  Does not retain
+  the head of the sequence. Returns nil."
+  (fn doseq [binding & body]
+    (let [elt (-nth binding 0)
+          coll (-nth binding 1)]
+      `(loop* [coll# (seq ~coll)]
+              (when coll#
+                (let [~elt (first coll#)]
+                  ~@body
+                  (recur (next coll#))))))))
 
 (defn identity [x]
   x)
