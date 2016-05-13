@@ -1,0 +1,50 @@
+(ns torque.test
+  (:require [torque.string :as str]))
+
+(def all-tests (atom {}))
+
+(def ^:dynamic *current-test-path* [])
+
+(defn with-added-test-path [f & path]
+  (binding [*current-test-path* (apply conj *current-test-path*
+                                       path)]
+    (f)))
+
+(defmacro deftest [name & body]
+  `(let [test-fn# (fn []
+                    (with-added-test-path (fn []
+                                            ~@body)
+                      ~(str *ns*)
+                      '~name))]
+     (def ~name test-fn#)
+     (swap! all-tests update (str *ns*) (fnil conj []) test-fn#)
+     nil))
+
+(defmacro testing [descr & body]
+  `(binding [*current-test-path* (conj *current-test-path*
+                                       ~(name descr))]
+    ~@body))
+
+(defn check-is [expr res msg]
+  (when-not res
+    (println "\nTEST FAILURE in"
+             (str/join " > "
+                       *current-test-path*))
+    (when msg
+      (println (str " " msg)))
+    (println " expected")
+    (println " " (str expr))
+    (println " to be truthy, but got")
+    (println " " (str res))))
+
+(defmacro is
+  ([expr]
+   `(check-is '~expr ~expr nil))
+  ([expr msg]
+   `(check-is '~expr ~expr ~msg)))
+
+(defn run-all-tests []
+  (println "\nRunning tests...")
+  (doseq [kv @all-tests]
+    (doseq [test (second kv)]
+      (test))))
