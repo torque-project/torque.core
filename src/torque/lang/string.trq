@@ -33,17 +33,26 @@
   (fn* [s]
     (. s length)))
 
+(def maybe-str
+  (fn* [s]
+    (if s
+      (if (satisfies? IPrintable s)
+        (-str s)
+        ;; TODO: print at least type name
+        "<unprintable>")
+      "nil")))
+
 (def str
   (fn* [& args]
     (if (not (nil? args))
       (loop* [xs (-next args)
-              b  (bytes (-str (-first args)))]
+              b  (bytes (maybe-str (-first args)))]
         (if (not (nil? xs))
           (let* [x        (let* [fst (-first xs)]
-                            (if fst
-                              fst
-                              "nil"))
-                 next-bin (binary b (bytes (-str x)))]
+                            (if (nil? fst)
+                              "nil"
+                              fst))
+                 next-bin (binary b (bytes (maybe-str x)))]
             (recur (-next xs) next-bin))
           (string b)))
       "")))
