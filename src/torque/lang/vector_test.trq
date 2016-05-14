@@ -1,0 +1,14 @@
+(ns torque.lang.vector-test
+  (:require [torque.test :refer [deftest is]]))
+
+(deftest equality
+  (is (= [] []))
+  (is (= [] (vector)))
+  ;(is (= [] ()))
+  ;(is (= [] (list)))
+  (is (= [1] [1]))
+  (is (= [1 2] (conj [1] 2)))
+  (is (= (vector) []))
+  ;(is (= (vector) (list)))
+  (is (= (vector 1 2) [1 2]))
+  (is (= (vector 1 2) (vector 1 2))))
