@@ -17,14 +17,16 @@
     ;; TODO: use extend to use a common implementation
     ;; with cons
     (str "("
-         (loop* [s ""
-                 f first
-                 r (seq rest)]
-                (if r
-                  (recur (str s f " ")
-                         (-first r)
-                         (-next r))
-                  (str s f)))
+         (if (== count 0)
+           ""
+           (loop* [s ""
+                   f first
+                   r (seq rest)]
+                  (if r
+                    (recur (str s f " ")
+                           (-first r)
+                           (-next r))
+                    (str s f))))
          ")"))
 
   ICloneable
@@ -67,7 +69,10 @@
   ;;   (seq/equiv o other))
 
   ISeqable
-  (-seq [o] o)
+  (-seq [o]
+    (if (== count 0)
+      nil
+      o))
 
   ICounted
   (-count [_] count)
@@ -84,7 +89,7 @@
 (def ^:private reverse
   (fn* [xs]
     (loop* [out (empty-list)
-            xs  xs]
+            xs  (seq xs)]
       (if (not (nil? xs))
         (recur (-conj out (-first xs))
                (-next xs))

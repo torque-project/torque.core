@@ -412,16 +412,16 @@
    (get-in m ks nil))
   ([m ks not-found]
    (loop [sentinel lookup-sentinel
-          m        m
+          out      m
           ks       (seq ks)]
      (if ks
-       (if (not (satisfies? ILookup m))
+       (if (not (satisfies? ILookup out))
          not-found
-         (let [m (get m (first ks) sentinel)]
-           (if (identical? sentinel m)
+         (let [nested (get out (first ks) sentinel)]
+           (if (identical? sentinel nested)
              not-found
-             (recur sentinel m (next ks)))))
-       m))))
+             (recur sentinel nested (next ks)))))
+       out))))
 
 (defn select-keys [map keyseq]
   (loop [ret  (hash-map)
