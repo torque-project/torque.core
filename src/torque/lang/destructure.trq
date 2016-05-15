@@ -1,0 +1,121 @@
+(ns torque.lang.destructure
+  (:require [torque.lang.symbol :refer :all]))
+
+(defn ^:private destructure-vec [lhs rhs]
+  (let [vsym (gensym "v")
+        simple-binding? (fn [x]
+                          (and (not= '& x)
+                               (not= :as x)))
+        simple-args (take-while simple-binding? lhs)
+        rest-and-as-args (drop-while simple-binding? lhs)
+        bindings [[vsym rhs]]
+        simple-bindings (->> simple-args
+                             (map (fn [sym]
+                                    [sym `(first ~vsym)]))
+                             (interpose [vsym `(next ~vsym)]))
+        rest-bindings (when (= (first rest-and-as-args) '&)
+                        (let [rest-lhs (second rest-and-as-args)
+                              rest-rhs (if (seq simple-args)
+                                         `(next ~vsym)
+                                         vsym)
+                              rest-rhs (if (map? rest-lhs)
+                                         `(apply hash-map ~rest-rhs)
+                                         rest-rhs)]
+                          [[rest-lhs rest-rhs]]))
+        as-args (if (= (first rest-and-as-args) '&)
+                  (drop 2 rest-and-as-args)
+                  rest-and-as-args)
+        as-bindings (when (= (first as-args) :as)
+                      [[(second as-args) vsym]])
+        illegal-args (if (= (first as-args) :as)
+                       (drop 2 as-args)
+                       as-args)]
+    (when (seq illegal-args)
+      (throw (ex-info "Illegal vector destructuring"
+                      {:args illegal-args})))
+    (into bindings (concat as-bindings
+                           simple-bindings
+                           rest-bindings))))
+
+(defn ^:private destructure-map [lhs rhs]
+  (let [msym (gensym "m")
+        bindings [[msym rhs]]
+        as-bindings (when-let [as-sym (:as lhs)]
+                      [[as-sym msym]])
+        or-map (:or lhs)
+        or-syms (->> or-map
+                     (map (fn [kv]
+                            [(first kv)
+                             (gensym (str "or_" (name (first kv))))]))
+                     (into {}))
+        or-bindings (->> or-map
+                         (map (fn [kv]
+                                [(get or-syms (first kv))
+                                 (second kv)])))
+        or-term (fn [sym expr]
+                  (if-let [or-sym (get or-syms sym)]
+                    `(or ~expr
+                         ~or-sym)
+                    expr))
+        keys-like-bindings (fn [key constructor]
+                             (when-let [syms (key lhs)]
+                               (->> syms
+                                    (map (fn [sym]
+                                           (let [expr `(get ~msym
+                                                            ~(constructor sym))]
+                                             [sym (or-term sym expr)]))))))
+        keys-bindings (keys-like-bindings :keys (comp keyword name))
+        strs-bindings (keys-like-bindings :strs name)
+        syms-bindings (keys-like-bindings :syms (fn [sym]
+                                                  `'~sym))
+        simple-bindings (->> lhs
+                             (remove (comp #{:as :or :keys :strs :syms}
+                                           first))
+                             (map (fn [kv]
+                                    (let [k (first kv)
+                                          v (second kv)
+                                          expr `(get ~msym ~v)]
+                                      [k (or-term k expr)]))))]
+    (into bindings (concat as-bindings
+                           or-bindings
+                           keys-bindings
+                           strs-bindings
+                           syms-bindings
+                           simple-bindings))))
+
+(defn ^:private destructure-one [binding]
+  (let [lhs (first binding)
+        rhs (second binding)]
+    (cond (symbol? lhs) nil
+          (vector? lhs) (destructure-vec lhs rhs)
+          (map? lhs)    (destructure-map lhs rhs)
+          :else         (throw (ex-info "Illegal lhs in binding"
+                                        {:binding binding})))))
+
+(defn ^:private destructure [bindings]
+  (when-not (even? (count bindings))
+    (throw (ex-info "Bindings must contain an even number of forms"
+                    {:bindings bindings})))
+  (loop [processed []
+         remaining (seq (partition 2 bindings))]
+    (if remaining
+      (let [fst          (first remaining)
+            rst          (next remaining)
+            destructured (destructure-one fst)]
+        (if destructured
+          (recur processed
+                 (concat destructured rst))
+          (recur (conj processed (first fst) (second fst))
+                 rst)))
+      processed)))
+
+"binding => binding-form init-expr
+  Evaluates the exprs in a lexical context in which the symbols in the
+  binding-forms are bound to their respective init-exprs or parts
+  therein."
+
+(defmacro let
+  [bindings & body]
+  (let* [bindings' (destructure bindings)]
+    `(let* ~bindings'
+       ~@body)))

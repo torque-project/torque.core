@@ -1,0 +1,102 @@
+(ns torque.lang.destructure-test
+  (:require [torque.test   :refer :all]
+            [torque.string :as str]))
+
+(deftest vectors
+  (testing "simple"
+    (let [[x] [1]]
+      (is (= 1 x)))
+    (let [[x y] [1]]
+      (is (= 1 x))
+      (is (nil? y)))
+    (let [[x y z] [1 2 3 4]]
+      (is (= 1 x))
+      (is (= 2 y))
+      (is (= 3 z))))
+  (testing "with &"
+    (let [[& xs] [1]]
+      (is (= [1] xs)))
+    (let [[x & xs] [1]]
+      (is (= 1 x))
+      (is (nil? xs)))
+    (let [[x & xs] [1 2]]
+      (is (= 1 x))
+      (is (= [2] xs)))
+    (let [[x y & xs] [1 2 3]]
+      (is (= 1 x))
+      (is (= 2 y))
+      (is (= [3] xs))))
+  (testing "with :as"
+    (let [[:as v] [1]]
+      (is (= [1] v)))
+    (let [[x :as v] [1 2]]
+      (is (= 1 x))
+      (is (= [1 2] v)))
+    (let [[x y :as v] [1 2 3]]
+      (is (= 1 x))
+      (is (= 2 y))
+      (is (= [1 2 3] v)))
+    (let [[x y & xs :as v] [1 2 3]]
+      (is (= 1 x))
+      (is (= 2 y))
+      (is (= [3] xs))
+      (is (= [1 2 3] v))))
+  (testing "recursive"
+    (let [[a [b :as inner] :as outer] [1 [2]]]
+      (is (= 1 a))
+      (is (= 2 b))
+      (is (= [2] inner))
+      (is (= [1 [2]] outer)))))
+
+(deftest maps
+  (testing "direct"
+    (let [{a :x} {:x 42}]
+      (is (= 42 a)))
+    (let [{a :x b :y} {:x 42}]
+      (is (= 42 a))
+      (is (nil? b))))
+  (testing "as"
+    (let [{:as m} {:x 42}]
+      (is (= {:x 42} m)))
+    (let [{a :x :as m} {:x 1 :y 2}]
+      (is (= 1 a))
+      (is (= {:x 1 :y 2} m))))
+  (testing "keys"
+    (let [{:keys [x]} {:x 1 :y 2}]
+      (is (= 1 x)))
+    (let [{:keys [x y]} {:x 1 :y 2}]
+      (is (= 1 x))
+      (is (= 2 y)))
+    (let [{a :y :keys [x]} {:x 1 :y 2}]
+      (is (= 1 x))
+      (is (= 2 a)))
+    (let [{a :y :as m :keys [x]} {:x 1 :y 2}]
+      (is (= 1 x))
+      (is (= 2 a))
+      (is (= {:x 1 :y 2} m))))
+  (testing "strs"
+    (let [{:strs [a b]} {"a" 1 "b" 2}]
+      (is (= 1 a))
+      (is (= 2 b))))
+  (testing "syms"
+    (let [{:syms [a b]} (hash-map (symbol "a") 1 "b" 2)]
+      (is (= 1 a))
+      (is (nil? b))))
+  (testing "or"
+    (let [{a :x :or {a 42}} {:x 2}]
+      (is (= 2 a)))
+    (let [{a :x :or {a 42}} {:y 2}]
+      (is (= 42 a)))
+    (let [{a :y :as m :keys [x] :or {x 42 a 43}} {}]
+      (is (= 42 x))
+      (is (= 43 a))
+      (is (= {} m)))))
+
+(deftest rest-map
+  (let [[& {:keys [x]} :as v] [:a 1 :x 42]]
+    (is (= 42 x))
+    (is (= [:a 1 :x 42] v)))
+  (let [[a b & {:keys [x]}] [:a 1 :x 42]]
+    (is (= 42 x))
+    (is (= :a a))
+    (is (= 1 b))))

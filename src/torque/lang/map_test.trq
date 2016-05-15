@@ -1,0 +1,14 @@
+(ns torque.lang.map-test
+  (:require [torque.test :refer :all]))
+
+(deftest equality
+  (is (= {} {}))
+  (is (not= {} {:x 1}))
+  (is (not= {:x 2} {:x 1}))
+  (is (not= {:x 1} {:y 1}))
+  (is (not= {:x nil} {:y 1}))
+  (is (= {} (hash-map)))
+  (is (= (hash-map) {}))
+  (is (= {:x 1} {:x 1}))
+  (is (= {:x 1} (hash-map :x 1)))
+  (is (= (hash-map :x 1) {:x 1})))
