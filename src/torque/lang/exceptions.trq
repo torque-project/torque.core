@@ -8,7 +8,9 @@
 (deftype ExceptionInfo [message data cause]
 
   IPrintable
-  (-str [_] message))
+  (-str [_] (str message (if data
+                           (str "\n  " data)
+                           ""))))
 
 (def ex-info
   (fn* ex-info
