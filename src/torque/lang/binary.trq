@@ -115,8 +115,9 @@
       (throw-binary-width b offset length))))
 
 (defn bcompare
-  "Compare to binaries, returning true if the bytes b's bytes
-   are identical to a' bytes at off."
+  "Compare two binaries. Returns true if a and b are identical
+   starting at byte 'off' of a. If 'len' is given, only len bytes
+   are compared."
   ([a b]
    (if (== (blength a) (blength b))
      (bcompare a b 0 (blength a))
