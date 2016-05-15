@@ -1,6 +1,6 @@
 (ns torque.string-test
-  (:require [torque.string :as str])
-  (:use [torque.test]))
+  (:require [torque.string :as str]
+            [torque.test   :refer :all]))
 
 (deftest join
   (is (= "123"
@@ -8,3 +8,12 @@
   (is (= "foo, bar"
          (str/join ", "
                    ["foo" 'bar]))))
+
+(deftest starts-with?
+  (is (str/starts-with? "" ""))
+  (is (str/starts-with? "foo" ""))
+  (is (str/starts-with? "foo" "f"))
+  (is (str/starts-with? "foo" "fo"))
+  (is (str/starts-with? "foo" "foo"))
+  (is (not (str/starts-with? "foo" "bo")))
+  (is (not (str/starts-with? "" "x"))))
