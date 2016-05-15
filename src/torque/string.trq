@@ -100,14 +100,14 @@
 
 (defn starts-with? [s substr]
   (and s substr
-       (bcompare (bytes s) (bytes substr))))
+       (bcompare (bytes s) (bytes substr) 0 (count substr))))
 
 (defn ends-with? [s substr]
   (and s substr
        (let [a    (bytes s)
              b    (bytes substr)
              dist (- (blength a) (blength b))]
-         (and (>= dist 0) (bcompare a b dist)))))
+         (and (>= dist 0) (bcompare a b dist (blength b))))))
 
 (defn index-of
   ([s pat]

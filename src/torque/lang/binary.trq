@@ -9,7 +9,7 @@
 (def ^:private libc (ffi/so "c"))
 
 (ffi/defimport memcpy libc memcpy :ptr [:ptr :ptr :sint64])
-(ffi/defimport bcmp libc bcmp :ptr [:ptr :ptr :sint64])
+(ffi/defimport bcmp libc bcmp :uint32 [:ptr :ptr :sint64])
 
 ;; (deftype Binary [size data]
 
@@ -116,14 +116,16 @@
 
 (defn bcompare
   "Compare to binaries, returning true if the bytes b's bytes
-   are identical to a' bytes at off.
-   If off + (blength b) > (blength a) false is returned"
+   are identical to a' bytes at off."
   ([a b]
-   (bcompare a b 0))
-  ([a b off]
+   (if (== (blength a) (blength b))
+     (bcompare a b 0 (blength a))
+     false))
+  ([a b off len]
    (if (and a b)
-     (if (<= (+ (blength b) off) (blength a))
-       (== (bcmp (+ (intptr a) off) (intptr b) (blength a)) 0)
+     (if (and (<= len (+ (blength b) off))
+              (<= len (blength a)))
+       (== (bcmp (+ (intptr a) off) (intptr b) len) 0)
        false))
    ;; TODO: throw invalid arg
    ))
