@@ -1,0 +1,7 @@
+(ns torque.lang.debug)
+
+(def ^:macro spy
+  (fn* [form]
+    `(let* [res# ~form]
+       (print (str '~form " => " res#))
+       res#)))
