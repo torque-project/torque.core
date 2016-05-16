@@ -1,0 +1,16 @@
+(ns torque.lang.seq-test
+  (:require [torque.test :refer :all]))
+
+(deftest concat
+  ;; (is (= (list 1 2 3)
+  ;;        (concat (list 1)
+  ;;                (list 2 3))))
+  ;; (is (= (list 1)
+  ;;        (concat (list 1)
+  ;;                nil)))
+  ;; (is (= (list)
+  ;;        (concat (list)
+  ;;                nil)))
+  (is (= []
+         (concat []
+                 nil))))
