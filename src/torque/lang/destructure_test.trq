@@ -100,3 +100,8 @@
     (is (= 42 x))
     (is (= :a a))
     (is (= 1 b))))
+
+#_(deftest fn'
+  (let [f (fn [[x]]
+            x)]
+    (is (= 1 (f [1])))))

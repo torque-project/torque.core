@@ -118,3 +118,35 @@
   (let* [bindings' (destructure bindings)]
     `(let* ~bindings'
        ~@body)))
+
+(defn destructure-arity [arity]
+  (let [[args & body] arity
+        result `(~args ~@body)]
+    (spy arity)
+    (spy result)
+    (spy (= result arity))
+    result))
+
+#_(def ^:macro fn
+  (fn*
+   [& decl]
+   (let [name (when (symbol? (first decl))
+                (first decl))
+         decl (if name
+                (next decl)
+                decl)
+         doc  (when (string? (first decl))
+                (first decl))
+         decl (if doc
+                (next decl)
+                decl)
+         arities (if (list? (first decl))
+                   decl
+                   (list decl))
+         destructured (map destructure-arity arities)]
+     (concat ['fn*]
+             (when name
+               [name])
+             (when doc
+               [doc])
+             destructured))))
