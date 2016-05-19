@@ -138,8 +138,7 @@
 
   ISeqable
   (-seq [o]
-    (when (> cnt 0)
-      (new PersistentArrayMapSeq arr 0 nil)))
+    (new PersistentArrayMapSeq arr 0 nil))
 
   ICounted
   (-count [coll] cnt)

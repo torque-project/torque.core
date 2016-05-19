@@ -8,22 +8,22 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns torque.lang.cons
-  (:use
-    [torque.lang.protocols]
-    [torque.lang.boot])
   (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot :refer :all]
     [torque.lang.common.seq :as seq]))
 
 (deftype Cons [first rest meta]
 
-  IPrintable
-  (-str [this]
-    (seq/pr-str "(" ")" this))
-
   AList
 
+  IPrintable
+  (-str [this]
+    ;; (seq/pr-str "(" ")" this)
+    "Cons")
+
   ICloneable
-  (-clone [_]
+  (-clone [o]
     (new Cons first rest nil))
 
   IWithMeta
@@ -34,11 +34,11 @@
   (-meta [o] meta)
 
   ISeq
-  (-first [_]
+  (-first [this]
     first)
-  (-rest [_]
+  (-rest [this]
     (if (nil? rest)
-      ()
+      nil
       rest))
 
   INext
@@ -71,4 +71,3 @@
       (if (satisfies? ISeq coll)
         (new Cons x coll nil)
         (new Cons x (seq coll) nil)))))
-

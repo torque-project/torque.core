@@ -1,8 +1,8 @@
 ;; -*- mode: clojure;-*-
 
 (ns torque.lang.boot
-  (:use
-    [torque.lang.protocols]))
+  (:require
+    [torque.lang.protocols :refer :all]))
 
 (def identical?
   (fn* identical? [x y] (torque.core.builtin/identical? x y)))
@@ -10,57 +10,35 @@
 (def satisfies?
   (fn* satisfies? [x y] (torque.core.builtin/satisfies? x y)))
 
-(def integer?
-  (fn* integer? [x]
-    (torque.core.builtin/integer? x)))
+(def +
+  (fn* + [a b] (torque.core.builtin/+ a b)))
 
-(def binary?
-  (fn* array? [x]
-    (torque.core.builtin/binary? x)))
+(def -
+  (fn* - [a b] (torque.core.builtin/- a b)))
 
-(def array?
-  (fn* array? [x]
-    (torque.core.builtin/array? x)))
+(def *
+  (fn* * [a b] (torque.core.builtin/* a b)))
 
-(def type
-  (fn* type [x] (torque.core.builtin/type x)))
+(def /
+  (fn* / [a b] (torque.core.builtin// a b)))
 
-(def instance?
-  (fn* instance? [t x] (identical? (type x) t)))
+(def bit-and
+  (fn* bit-and [a b] (torque.core.builtin/& a b)))
 
-(def binary
-  (fn* binary [& vs] (torque.core.builtin/binary vs)))
+(def bit-or
+  (fn* bit-or [a b] (torque.core.builtin/| a b)))
 
-(def make-binary
-  (fn* make-binary [n] (torque.core.builtin/make-binary n)))
+(def bit-shift-left
+  (fn* bit-shift-left [a b] (torque.core.builtin/bsl a b)))
 
-(def bget
-  (fn* bget [a n] (torque.core.builtin/bget a n)))
+(def bit-shift-right
+  (fn* bit-shift-right [a b] (torque.core.builtin/bsr a b)))
 
-(def blength
-  (fn* [a] (torque.core.builtin/blength a)))
+(def inc
+  (fn* inc [x] (+ x 1)))
 
-(def make-array
-  (fn* make-array [n] (torque.core.builtin/make-array n)))
-
-(def array
-  (fn* array [& vs] (torque.core.builtin/array vs)))
-
-(def aclone
-  (fn* aclone [a] (torque.core.builtin/aclone a)))
-
-(def acopy
-  (fn* acopy [dst src off len]
-    (torque.core.builtin/acopy dst src off len)))
-
-(def aget
-  (fn* aget [a n] (torque.core.builtin/aget a n)))
-
-(def aset
-  (fn* aset [a n v] (torque.core.builtin/aset a n v)))
-
-(def alength
-  (fn* [a] (torque.core.builtin/alength a)))
+(def dec
+  (fn* dec [x] (- x 1)))
 
 (def <
   (fn* < [a b] (torque.core.builtin/< a b)))
@@ -79,15 +57,102 @@
 
 (def =
   (fn* = [a b]
-    (if (identical? a b)
-      true
-      (if (satisfies? IEquiv a)
-        (-equiv a b)
-        false))))
+       (if (identical? a b)
+         true
+         (if (satisfies? IEquiv a)
+           (-equiv a b)
+           false))))
 
-(def type?
-  (fn* type? [x]
-    (torque.core.builtin/type? x)))
+;; (def integer?
+;;   (fn* integer? [x]
+;;     (torque.core.builtin/integer? x)))
+
+(def binary?
+  (fn* binary? [x]
+    (torque.core.builtin/binary? x)))
+
+(def array?
+  (fn* array? [x]
+    (torque.core.builtin/array? x)))
+
+(def type
+  (fn* type [x] (torque.core.builtin/type x)))
+
+(def instance?
+  (fn* instance? [t x] (identical? (type x) t)))
+
+(def make-binary
+  (fn* make-binary [n] (torque.core.builtin/make-binary n)))
+
+(def blength
+  (fn* blength [b]
+    (if (binary? b)
+      (torque.core.builtin/blength b)
+      ;; TODO: throw
+      nil)))
+
+(def bget
+  (fn* bget [b n]
+    (if (binary? b)
+      (if (torque.core.builtin/< n (blength b))
+        (torque.core.builtin/bget b n)
+        ;; TODO: throw
+        nil)
+      ;; TODO: throw
+      nil)))
+
+;; (def binary*
+;;   (fn* [xs]
+;;     (let [size (loop* [out 0
+;;                        xs  (-seq xs)]
+;;                  (if xs
+;;                    (let* [x (-first xs)
+;;                           s (if (binary? x)
+;;                               (blength x)
+;;                               (if (integer? x)
+;;                                 1
+;;                                 ;; throw
+;;                                 0))]
+;;                      (recur (+ x s) (-next xs)))
+;;                    out))
+;;           bin  (make-binary size)]
+;;       (loop* [pos 0
+;;               xs  (-seq xs)]
+;;         (if xs
+;;           (let* [x   (-first xs)
+;;                  len (blength x)]
+;;             (bcopy bin pos x len)
+;;             (recur (+ pos len) (-next xs)))
+;;           bin)))))
+
+;; (def binary
+;;   (fn* binary [& vs] (binary* vs)))
+
+(def make-array
+  (fn* make-array [n] (torque.core.builtin/make-array n)))
+
+;; (def aclone
+;;   (fn* aclone [a] (torque.core.builtin/aclone a)))
+
+;; (def acopy
+;;   (fn* acopy [dst src off len]
+;;     (torque.core.builtin/acopy dst src off len)))
+
+(def aget
+  (fn* aget [a n] (torque.core.builtin/aget a n)))
+
+(def aset
+  (fn* aset [a n v] (torque.core.builtin/aset a n v)))
+
+(def alength
+  (fn* [a] (torque.core.builtin/alength a)))
+
+(def array
+  (fn* array [& vs] vs))
+
+;; (def type?
+;;   (fn* type? [x]
+;;     (torque.core.builtin/type? x)))
 
 (def nil?
   (fn* nil? [x] (identical? x nil)))
@@ -110,85 +175,68 @@
 (def not
   (fn* not [x] (if x false true)))
 
-(def +
-  (fn* + [a b] (torque.core.builtin/+ a b)))
-
-(def -
-  (fn* - [a b] (torque.core.builtin/- a b)))
-
-(def *
-  (fn* * [a b] (torque.core.builtin/* a b)))
-
-(def /
-  (fn* / [a b] (torque.core.builtin// a b)))
-
-(def bit-and
-  (fn* bit-and [a b] (torque.core.builtin/& a b)))
-
-(def bit-or
-   (fn* bit-or [a b] (torque.core.builtin/| a b)))
-
-(def bit-shift-left
-  (fn* bit-shift-left [a b] (torque.core.builtin/bsl a b)))
-
-(def bit-shift-right
-  (fn* bit-shift-right [a b] (torque.core.builtin/bsr a b)))
-
-(def inc
-  (fn* inc [x] (+ x 1)))
-
-(def dec
-  (fn* dec [x] (- x 1)))
-
 (def seq
-  (fn* seq [x] (if x (-seq x) nil)))
+  (fn* seq [x]
+    (if (not (nil? x))
+      (if (satisfies? ISeqable x)
+        (-seq x)
+        nil)
+      nil)))
 
-(def bytes  -bytes)
+(def bytes -bytes)
 
-(def intptr
-  (fn* intptr [x]
-    (if (nil? x)
-      0
-      (if (integer? x)
-        x
-        (-intptr x)))))
+;; (def intptr
+;;   (fn* intptr [x]
+;;     (if (nil? x)
+;;       0
+;;       (if (integer? x)
+;;         x
+;;         (-intptr x)))))
 
 (def with-meta
   (fn* [o meta]
     (if (not (nil? o))
-      (-with-meta o meta)
+      (if (satisfies? IMeta o)
+        (-with-meta o meta)
+        nil)
       nil)))
 
 (def meta
   (fn* [o]
     (if (not (nil? o))
-      (if (satisfies? IMeta o)
+      (if (satisfies? IWithMeta o)
         (-meta o)
         nil)
       nil)))
 
-(deftype Reduced [val]
-  IDeref
-  (-deref [o] val))
+;; (deftype Reduced [val]
+;;   IDeref
+;;   (-deref [o] val))
 
-(def reduced
-  (fn* reduced [x]
-    (new Reduced x)))
+;; (def reduced
+;;   (fn* reduced [x]
+;;     (new Reduced x)))
 
-(def reduced?
-  (fn* reduced? [r]
-    (instance? Reduced r)))
+;; (def reduced?
+;;   (fn* reduced? [r]
+;;     (instance? Reduced r)))
 
-(def deref
-  (fn* deref [o]
-    (-deref o)))
+;; (def deref
+;;   (fn* deref [o]
+;;     (-deref o)))
 
-;; FIXME: crutches for devleopment. remove these later
+;; ;; FIXME: crutches for devleopment. remove these later
 
-(def print
-  (fn* [x]
-    (torque.core.builtin/print x)))
+;; (def print
+;;   (fn* [x]
+;;        (torque.core.builtin/print
+;;         (-intptr
+;;          (if (nil? x)
+;;            "nil"
+;;            (if (satisfies? IPrintable x)
+;;              (-str x)
+;;              "<unprintable>"))))))
 
-(def read
-  (fn* [x]
-    (torque.core.builtin/read x)))
+;; (def read
+;;   (fn* [x]
+;;     (torque.core.builtin/read x)))

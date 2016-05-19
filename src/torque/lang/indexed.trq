@@ -27,7 +27,7 @@
   (-rest [_]
     (if (< (inc i) (alength arr))
       (new IndexedSeq arr (inc i))
-      ()))
+      nil))
 
   INext
   (-next [_]

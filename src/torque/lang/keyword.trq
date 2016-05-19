@@ -36,8 +36,7 @@
     (if (nil? a) b (-lookup a this b))))
 
 (defn keyword? [x]
-  #?(:rev     (torque.core.builtin/keyword? x)
-     :default (instance? Keyword x)))
+  (instance? Keyword x))
 
 (defn keyword [name]
   (new Keyword nil name name))

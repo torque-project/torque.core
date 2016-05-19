@@ -29,10 +29,6 @@
     [torque.lang.common.seq :as seq]))
 
 (def ^:macro dotimes
-  "bindings => name n
-
-  Repeatedly executes body (presumably for side-effects) with name
-  bound to integers from 0 through n-1."
   (fn dotimes [binding & body]
     (let [i (-nth binding 0)
           n (-nth binding 1)]
@@ -42,28 +38,30 @@
              ~@body
              (recur (inc ~i))))))))
 
-(def ^:macro doseq
-  "Repeatedly executes body (presumably for side-effects) with
-  bindings and filtering as provided by \"for\".  Does not retain
-  the head of the sequence. Returns nil."
-  (fn doseq [binding & body]
-    (let [elt (-nth binding 0)
-          coll (-nth binding 1)]
-      `(loop* [coll# (seq ~coll)]
-              (when coll#
-                (let [~elt (first coll#)]
-                  ~@body
-                  (recur (next coll#))))))))
-
 (defn identity [x]
   x)
 
 (defn constantly [x]
   (fn [& args] x))
 
+(declare comp)
+
 (defn partial [f & fixed]
   (fn [& args]
     (apply f (concat fixed args))))
+
+;; (defn comp
+;;   ([] identity)
+;;   ([f] f)
+;;   ([f g]
+;;    (fn
+;;      ([] (f (g)))
+;;      ([x] (f (g x)))
+;;      ([x y] (f (g x y)))
+;;      ([x y z] (f (g x y z)))
+;;      ([x y z & args] (f (apply g x y z args)))))
+;;   ([f g & fs]
+;;    (seq/reduce comp (list* f g fs))))
 
 (defn not-empty
   [coll] (when (seq coll) coll))
@@ -76,37 +74,6 @@
         (alength coll)
         (seq/count coll)))
     0))
-
-(defn spread
-  [arglist]
-  (cond
-    (nil? arglist) nil
-    (nil? (next arglist)) (seq (first arglist))
-    :else (cons (first arglist)
-                (spread (next arglist)))))
-
-(defn list*
-  "Creates a new list containing the items prepended to the rest, the
-  last of which will be treated as a sequence."
-  ([args] (seq args))
-  ([a args] (cons a args))
-  ([a b args] (cons a (cons b args)))
-  ([a b c args] (cons a (cons b (cons c args))))
-  ([a b c d & more]
-   (cons a (cons b (cons c (cons d (spread more)))))))
-
-(defn comp
-  ([] identity)
-  ([f] f)
-  ([f g]
-   (fn
-     ([] (f (g)))
-     ([x] (f (g x)))
-     ([x y] (f (g x y)))
-     ([x y z] (f (g x y z)))
-     ([x y z & args] (f (apply g x y z args)))))
-  ([f g & fs]
-   (seq/reduce comp (list* f g fs))))
 
 (defn ^:private linear-traversal-nth
   ([coll n]
@@ -410,16 +377,16 @@
    (get-in m ks nil))
   ([m ks not-found]
    (loop [sentinel lookup-sentinel
-          out      m
+          m        m
           ks       (seq ks)]
      (if ks
-       (if (not (satisfies? ILookup out))
+       (if (not (satisfies? ILookup m))
          not-found
-         (let [nested (get out (first ks) sentinel)]
-           (if (identical? sentinel nested)
+         (let [m (get m (first ks) sentinel)]
+           (if (identical? sentinel m)
              not-found
-             (recur sentinel nested (next ks)))))
-       out))))
+             (recur sentinel m (next ks)))))
+       m))))
 
 (defn select-keys [map keyseq]
   (loop [ret  (hash-map)
@@ -440,28 +407,7 @@
       (assoc m k (assoc-in (get m k) ks v))
       (assoc m k v))))
 
-(defn update
-  "'Updates' a value in an associative structure, where k is a
-  key and f is a function that will take the old value
-  and any supplied args and return the new value, and returns a new
-  structure.  If the key does not exist, nil is passed as the old value."
-  ([m k f]
-   (assoc m k (f (get m k))))
-  ([m k f x]
-   (assoc m k (f (get m k) x)))
-  ([m k f x y]
-   (assoc m k (f (get m k) x y)))
-  ([m k f x y z]
-   (assoc m k (f (get m k) x y z)))
-  ([m k f x y z & more]
-   (assoc m k (apply f (get m k) x y z more))))
-
 (defn update-in
-  "'Updates' a value in a nested associative structure, where ks is a
-  sequence of keys and f is a function that will take the old value
-  and any supplied args and return the new value, and returns a new
-  nested structure.  If any levels do not exist, hash-maps will be
-  created."
   ([m ks f]
    (let [k (first ks)]
      (if-let [ks (next ks)]

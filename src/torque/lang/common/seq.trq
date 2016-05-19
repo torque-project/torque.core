@@ -1,9 +1,9 @@
 ;; -*- mode: clojure;-*-
 
 (ns torque.lang.common.seq
-  (:use
-    [torque.lang.boot]
-    [torque.lang.string]))
+  (:require
+    [torque.lang.boot :refer :all]
+    [torque.lang.string :refer :all]))
 
 (def equiv
   (fn* equiv [x y]
@@ -43,13 +43,13 @@
            (recur nval (-next xs)))
          val)))))
 
-(def pr-str
-  (fn* pr-str [begin end coll]
-    (if (not (seq coll))
-      (str begin end)
-      (str begin
-           (reduce
-            (fn* [s x]
-              (str s " " x))
-            coll)
-           end))))
+;; (def pr-str
+;;   (fn* pr-str [begin end coll]
+;;     (if (not (seq coll))
+;;       (str begin end)
+;;       (str begin
+;;            (reduce
+;;             (fn* [s x]
+;;               (str s " " x))
+;;             coll)
+;;            end))))
