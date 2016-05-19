@@ -26,6 +26,7 @@
     [torque.lang.arrows]
     [torque.lang.set]
     [torque.lang.range]
+    [torque.lang.meta]
     [torque.lang.atom]
     [torque.lang.hierarchy]
     [torque.lang.multimethod]

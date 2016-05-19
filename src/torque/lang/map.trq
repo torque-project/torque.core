@@ -171,4 +171,4 @@
 
 (defn contains?
   [coll v]
-  (not (identical? (get coll v lookup-sentinel) lookup-sentinel)))
+  (not (identical? (get coll v ::lookup-sentinel) ::lookup-sentinel)))

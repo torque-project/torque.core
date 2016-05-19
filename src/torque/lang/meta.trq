@@ -1,0 +1,26 @@
+(ns torque.lang.meta
+  (:require
+    [torque.lang.boot :refer :all]
+    [torque.lang.protocols :refer :all]
+    [torque.lang.def :refer :all]
+    [torque.lang.algo :refer :all]))
+
+(defn alter-meta!
+  "Atomically sets the metadata for a namespace/var/ref/agent/atom to be:
+
+  (apply f its-current-meta args)
+
+  f must be free of side-effects"
+  [iref f & args]
+  (set! iref meta (apply f (. iref meta) args)))
+
+(defn reset-meta!
+  "Atomically resets the metadata for an atom"
+  [iref m]
+  (set! iref meta m))
+
+(defn vary-meta
+  "Returns an object of the same type and value as obj, with
+  (apply f (meta obj) args) as its metadata."
+  [obj f & args]
+  (with-meta obj (apply f (meta obj) args)))
