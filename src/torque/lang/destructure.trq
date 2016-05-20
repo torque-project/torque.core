@@ -120,14 +120,40 @@
        ~@body)))
 
 (defn destructure-arity [arity]
-  (let [[args & body] arity
-        result `(~args ~@body)]
-    (spy arity)
-    (spy result)
-    (spy (= result arity))
-    result))
+  (let [[args & body] arity]
+    (if (every? symbol? args)
+      arity
+      (loop [bindings []
+             new-args []
+             args (seq args)]
+        (if args
+          (let [current-arg (first args)]
+            (if (symbol? current-arg)
+              (if (= '& current-arg)
+                (let [current-arg (first (next args))
+                      error-args (next (next args))
+                      arg-sym (gensym "arg__")]
+                  (when error-args
+                    (throw (ex-info "Only one arg allowed after & in fn"
+                                    {:error-args error-args})))
+                  (recur (conj bindings
+                               current-arg (if (map? current-arg)
+                                             `(apply hash-map ~arg-sym)
+                                             arg-sym))
+                         (conj new-args '& arg-sym)
+                         nil))
+                (recur bindings
+                       (conj new-args current-arg)
+                       (next args)))
+              (let [arg-sym (gensym "arg__")]
+                (recur (conj bindings current-arg arg-sym)
+                       (conj new-args arg-sym)
+                       (next args)))))
+          (do
+            `(~new-args (let ~bindings
+                          ~@body))))))))
 
-#_(def ^:macro fn
+(def ^:macro fn
   (fn*
    [& decl]
    (let [name (when (symbol? (first decl))
