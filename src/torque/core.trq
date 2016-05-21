@@ -37,3 +37,15 @@
 
 (defn println [& args]
   (print (apply str (interpose " " args))))
+
+(defn ^:dynamic ns-resolve
+  "Returns the var to which a symbol will be resolved in the
+  namespace , else nil.  Note that if the symbol is fully qualified,
+  the var to which it resolves need not be present in the namespace."
+  [ns sym]
+  (torque.core.builtin/ns-resolve ns sym))
+
+(defn resolve
+  "Same as (ns-resolve *ns* symbol) or (ns-resolve *ns* &env symbol)"
+  [sym]
+  (ns-resolve *ns* sym))
