@@ -294,6 +294,10 @@
   [n coll]
   [(take n coll) (drop n coll)])
 
+(defn split-with
+  [pred coll]
+  [(take-while pred coll) (drop-while pred coll)])
+
 (defn repeat
   ([x]
    (lazy-seq (cons x (repeat x))))
