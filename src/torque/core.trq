@@ -49,3 +49,10 @@
   "Same as (ns-resolve *ns* symbol) or (ns-resolve *ns* &env symbol)"
   [sym]
   (ns-resolve *ns* sym))
+
+(defn the-ns
+  "If passed a namespace, returns it. Else, when passed a symbol,
+   returns the namespace named by it, throwing an exception if not
+   found."
+  [x]
+  (torque.core.builtin/the-ns x))

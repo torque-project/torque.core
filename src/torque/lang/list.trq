@@ -1,10 +1,11 @@
 ;; -*- mode: clojure;-*-
 
 (ns torque.lang.list
-  (:use
-    [torque.lang.protocols]
-    [torque.lang.boot]
-    [torque.lang.string]))
+  (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot :refer :all]
+    [torque.lang.string :refer :all]
+    [torque.lang.common.seq :as seq]))
 
 (deftype List [meta first rest count]
 
