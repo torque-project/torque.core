@@ -1,0 +1,15 @@
+(ns torque.lang.algo-test
+  (:require [torque.test :refer :all]))
+
+(deftest mapv'
+  (is (= [1] (mapv inc (list 0))))
+  (is (= [1] (spy (mapv inc (range 1))))))
+
+(deftest loop-let-same-var
+  (is (= 1 (loop [x 0
+                  continue? true]
+             (print x)
+             (if continue?
+               (let [x (inc x)]
+                 (recur x false))
+               x)))))
