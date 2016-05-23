@@ -5,3 +5,11 @@
     `(let* [res# ~form]
        (print (str '~form " => " res#))
        res#)))
+
+(def ^:macro trace
+  (fn* [descr form]
+       `(do
+          (print (str "start " ~descr))
+          (let* [res# ~form]
+            (print (str "end " ~descr " => " res#))
+            res#))))
