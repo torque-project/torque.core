@@ -21,7 +21,7 @@
   (:require
     [torque.lang.common.seq :as seq]))
 
-(declare extend-root extend-tail do-assoc)
+(declare extend-root extend-tail do-assoc do-pop empty-vector)
 
 (defn throw-out-of-bounds [n]
   (throw
@@ -49,6 +49,25 @@
 
   IMeta
   (-meta [o] meta)
+
+  IStack
+  (-peek [v]
+    (when (> cnt 0)
+      (-nth v (dec cnt))))
+
+  (-pop [this]
+    (cond
+      (zero? cnt)
+        nil ;; TODO: throw
+      (== 1 cnt)
+        (-with-meta (empty-vector) meta)
+      (< 1 (- cnt (tail-off this)))
+        (let [new-cnt  (dec cnt)
+              tail-len (dec (alength tail))]
+          (new PersistentVector meta new-cnt shift root
+            (acopy (make-array tail-len) tail 0 tail-len)))
+      :else
+        (do-pop this)))
 
   ICollection
   (-conj [coll o]
@@ -209,6 +228,45 @@
             new-val (do-assoc v (- level 5) (pv-aget node subidx) i val)]
         (pv-aset ret subidx new-val)
         ret))))
+
+(defn ^:private node-with-child [node idx child]
+  (let [ret (pv-clone-node node)]
+    (pv-aset node idx child)
+    ret))
+
+(defn ^:private pop-tail [cnt level node]
+  (let [idx (pv-index cnt level)]
+    (cond
+      (> level 5)
+        (let [new-child (pop-tail cnt (- level 5) (pv-aget node idx))]
+          (when-not (and1 (nil? new-child) (zero? idx))
+            (node-with-child node idx new-child)))
+      (zero? idx)
+        nil
+      :else
+        (node-with-child node idx nil))))
+
+(defn ^:private do-pop [v]
+  (let [meta     (. v meta)
+        shift    (. v shift)
+        cnt-2    (- (. v cnt) 2)
+        new-tail (unchecked-array-for v cnt-2)
+        nr       (pop-tail cnt-2 shift (. v tail))
+        new-root (if (nil? nr) (empty-vector) nr)
+        new-cnt  (dec (. v cnt))]
+    (if (and1 (< 5 (. v shift)) (nil? (pv-aget new-root 1)))
+      (new PersistentVector
+           meta
+           new-cnt
+           (- shift 5)
+           (pv-aget new-root 0)
+           new-tail)
+      (new PersistentVector
+           meta
+           new-cnt
+           shift
+           new-root
+           new-tail))))
 
 (defn empty-vector []
   (new PersistentVector nil 0 5 (empty-vector-node) (make-array 0)))

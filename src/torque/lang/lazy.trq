@@ -71,4 +71,3 @@
 (def ^:macro lazy-seq
   (fn* [& body]
     (list 'new 'LazySeq (list 'fn* '[] (cons 'do body)) 'nil)))
-

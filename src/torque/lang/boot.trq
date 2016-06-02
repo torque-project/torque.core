@@ -14,6 +14,10 @@
   (fn* integer? [x]
     (torque.core.builtin/integer? x)))
 
+(def fn?
+  (fn* integer? [x]
+    (torque.core.builtin/fn? x)))
+
 (def binary?
   (fn* array? [x]
     (torque.core.builtin/binary? x)))
