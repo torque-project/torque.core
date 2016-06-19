@@ -143,13 +143,13 @@
         (let [arr    (unchecked-array-for coll i)
               len    (alength arr)
               result (loop [j    0
-                            init init]
+                            node init]
                        (if (< j len)
-                         (let [init (f init (aget arr j))]
-                           (if (reduced? init)
-                             init
-                             (recur (inc j) init)))
-                         init))]
+                         (let [acc (f node (aget arr j))]
+                           (if (reduced? acc)
+                             acc
+                             (recur (inc j) acc)))
+                         node))]
           (if (reduced? init)
             @init
             (recur (+ i len) result)))
