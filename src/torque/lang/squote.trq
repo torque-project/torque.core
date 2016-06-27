@@ -8,11 +8,13 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns torque.lang.squote
-  (:use
-   [torque.lang.protocols]
-   [torque.lang.boot]
-   [torque.lang.seq]
-   [torque.lang.chunked]))
+  (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot :refer :all]
+    [torque.lang.cons :refer :all]
+    [torque.lang.seq :refer :all]
+    [torque.lang.chunked :refer :all]
+    [torque.lang.lazy :refer :all]))
 
 ;; This is in its own namespace, since providing apply and concat enables
 ;; syntax quotes, which are then used in all the code past this point
@@ -22,8 +24,31 @@
     (cons (first xs) (collect ys))
     (seq (first xs))))
 
+(defn applier
+  ([f xs]
+   (let [x0 (first xs)
+         n  (next xs)]
+     (if (nil? n)
+       (f x0)
+       (applier f x0 n))))
+  ([f x0 xs]
+   (let [x1 (first xs)
+         n  (next xs)]
+     (if (nil? n)
+       (f x0 x1)
+       (applier f x0 x1 n))))
+  ([f x0 x1 xs]
+   (let [x2 (first xs)
+         n  (next xs)]
+     (if (nil? n)
+       (f x0 x1 x2)
+       (applier x0 x1 x2 n))))
+  ([f x0 x1 x2 xs]
+   (let [x3 (first xs)]
+     (f x0 x1 x2 x3))))
+
 (defn apply [f & args]
-  (apply* f (collect args)))
+  (applier f (collect (array-seq args))))
 
 (defn ^:private cat [xys zs]
   (lazy-seq

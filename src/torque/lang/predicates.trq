@@ -1,11 +1,15 @@
 ;; -*- mode: clojure;-*-
 
 (ns torque.lang.predicates
-  (:use
-    [torque.lang.protocols]
-    [torque.lang.boot]
-    [torque.lang.def]
-    [torque.lang.let]))
+  (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot :refer :all]
+    [torque.lang.def :refer :all]
+    [torque.lang.flow :refer :all]
+    [torque.lang.let :refer :all]
+    [torque.lang.indexed :refer :all]
+    [torque.lang.vector :refer :all]
+    [torque.lang.squote :refer :all]))
 
 (defn boolean [x]
   (if x true false))
@@ -40,6 +44,9 @@
 (defn map? [x]
   (satisfies? IMap x))
 
+(defn set? [x]
+  (satisfies? ISet x))
+
 (defn chunked-seq? [x]
   (satisfies? IChunkedSeq x))
 
@@ -55,28 +62,25 @@
 (defn printable? [x]
   (satisfies? IPrintable x))
 
-(def ^:macro and
-  (fn and
-    ([]  true)
-    ([x] x)
-    ([x & next]
-     `(let [and# ~x]
-        (if and# (and ~@next) and#)))))
+(defmacro and
+  ([]  true)
+  ([x] x)
+  ([x & xs]
+   `(let [and# ~x]
+      (if and# (and ~@xs) and#))))
 
-(def ^:macro or
-  (fn or
-    ([]  nil)
-    ([x] x)
-    ([x & xs]
-     `(let [or# ~x]
-        (if or# or# (or ~@xs))))))
+(defmacro or
+  ([]  nil)
+  ([x] x)
+  ([x & xs]
+   `(let [or# ~x]
+      (if or# or# (or ~@xs)))))
 
 (defn named? [x]
   (or (satisfies? INamed x) (string? x)))
 
-(def ^:macro not=
-  (fn [a b]
-    `(not (= ~a ~b))))
+(defmacro not= [a b]
+  `(not (= ~a ~b)))
 
 (defn has-meta? [x]
   (and (satisfies? IMeta x) (satisfies? IWithMeta x)))
@@ -92,11 +96,11 @@
 
 (defn complement
   [f]
-  (fn complement
+  (fn
     ([] (not (f)))
     ([x] (not (f x)))
     ([x y] (not (f x y)))
-    ([x y & zs] (not (apply f x y zs)))))
+    ([x y & zs] (not (apply f x y (array-seq zs))))))
 
 (defn every?
   [pred coll]
@@ -104,12 +108,13 @@
     (nil? (seq coll))
       true
     (pred (first coll))
-      (recur pred (next coll))
+      (every? pred (next coll))
     :else
       false))
 
 (defn some
   [pred coll]
-  (when (seq coll)
-    (or (pred (first coll))
-        (recur pred (next coll)))))
+  (loop [coll coll]
+    (when (seq coll)
+      (or (pred (first coll))
+          (recur (next coll))))))

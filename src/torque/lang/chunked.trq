@@ -8,15 +8,14 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns torque.lang.chunked
-  (:use
-    [torque.lang.protocols]
-    [torque.lang.boot]
-    [torque.lang.let]
-    [torque.lang.def]
-    [torque.lang.seq]
-    [torque.lang.common.node]))
-
-(declare chunked-seq)
+  (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot :refer :all]
+    [torque.lang.cons :refer :all]
+    [torque.lang.let :refer :all]
+    [torque.lang.def :refer :all]
+    [torque.lang.seq :refer :all]
+    [torque.lang.common.node :refer :all]))
 
 (deftype ChunkedSeq [vec node i off]
 
@@ -34,7 +33,7 @@
     (aget node off))
   (-rest [this]
     (if (< (inc off) (alength node))
-      (let [s (chunked-seq vec node i (inc off))]
+      (let [s (new ChunkedSeq vec node i (inc off))]
         (if (nil? s)
           ()
           s))
@@ -43,7 +42,7 @@
   INext
   (-next [coll]
     (if (< (inc off) (alength node))
-      (let [s (chunked-seq vec node i (inc off))]
+      (let [s (new ChunkedSeq vec node i (inc off))]
         (if (nil? s)
           nil
           s))
@@ -56,14 +55,14 @@
   (-chunked-rest [coll]
     (let [end (+ i (alength node))]
       (if (< end (-count vec))
-        (chunked-seq vec (unchecked-array-for vec end) end 0)
+        (new ChunkedSeq vec (unchecked-array-for vec end) end 0)
         ())))
 
   IChunkedNext
   (-chunked-next [coll]
     (let [end (+ i (alength node))]
       (when (< end (-count vec))
-        (chunked-seq vec (unchecked-array-for vec end) end 0)))))
+        (new ChunkedSeq vec (unchecked-array-for vec end) end 0)))))
 
 (deftype ChunkedCons [chunk more meta]
 

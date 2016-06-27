@@ -8,37 +8,38 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns torque.lang.lazy
-  (:use
-    [torque.lang.protocols]
-    [torque.lang.boot]
-    [torque.lang.flow]))
+  (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot :refer :all]
+    [torque.lang.flow :refer :all]
+    [torque.lang.def :refer :all]
+    [torque.lang.indexed :refer :all]))
 
-(def sval
-  (fn* [ls]
-    (let* [f (. ls fn)]
-      (when f
-        (set! ls s  (f))
-        (set! ls fn nil)
-        (. ls s)))))
+(defn sval [ls]
+  (let* [f (. ls fn)]
+    (when f
+      (set! ls s (f))
+      (set! ls fn nil)
+      (. ls s))))
 
 (deftype LazySeq [fn s]
 
-  IPrintable
-  (-str [this]
-    ;; TODO: use extend to use a common implementation
-    ;; with list and cons
-    (let [first (-first this)
-          rest  (-rest this)]
-      (str "("
-           (loop* [s ""
-                   f first
-                   r (seq rest)]
-                  (if r
-                    (recur (str s f " ")
-                           (-first r)
-                           (-next r))
-                    (str s f)))
-           ")")))
+  ;; IPrintable
+  ;; (-str [this]
+  ;;   ;; TODO: use extend to use a common implementation
+  ;;   ;; with list and cons
+  ;;   (let [first (-first this)
+  ;;         rest  (-rest this)]
+  ;;     (str "("
+  ;;          (loop* [s ""
+  ;;                  f first
+  ;;                  r (seq rest)]
+  ;;                 (if r
+  ;;                   (recur (str s f " ")
+  ;;                          (-first r)
+  ;;                          (-next r))
+  ;;                   (str s f)))
+  ;;          ")")))
 
   ISeq
   (-first [this]
@@ -68,7 +69,7 @@
             (set! o s ls)
             (seq s)))))))
 
-(def ^:macro lazy-seq
-  (fn* [& body]
-    (list 'new 'LazySeq (list 'fn* '[] (cons 'do body)) 'nil)))
-
+(defmacro lazy-seq [& body]
+  (list 'new 'LazySeq
+        (list 'fn* '[] (cons 'do (array-seq body)))
+        'nil))

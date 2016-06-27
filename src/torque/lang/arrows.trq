@@ -8,14 +8,14 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns torque.lang.arrows
-  (:use
-    [torque.lang.protocols]
-    [torque.lang.boot]
-    [torque.lang.let]
-    [torque.lang.def]
-    [torque.lang.list]
-    [torque.lang.seq]
-    [torque.lang.predicates]))
+  (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot :refer :all]
+    [torque.lang.let :refer :all]
+    [torque.lang.def :refer :all]
+    [torque.lang.list :refer :all]
+    [torque.lang.seq :refer :all]
+    [torque.lang.predicates :refer :all]))
 
 (defmacro -> [x & forms]
   (loop [cur x
@@ -41,48 +41,48 @@
         (recur threaded (next fs)))
       cur)))
 
-(defmacro cond-> [expr & clauses]
-  (let [g     (gensym)
-        steps (map (fn [clause]
-                     (let [test (first clause)
-                           step (second clause)]
-                       `(if ~test (-> ~g ~step) ~g)))
-                   (partition 2 clauses))]
-    `(let [~g ~expr
-           ~@(interleave (repeat g) (butlast steps))]
-       ~(if (empty? steps)
-          g
-          (last steps)))))
+;; (defmacro cond-> [expr & clauses]
+;;   (let [g     (gensym)
+;;         steps (map (fn [clause]
+;;                      (let [test (first clause)
+;;                            step (second clause)]
+;;                        `(if ~test (-> ~g ~step) ~g)))
+;;                    (partition 2 clauses))]
+;;     `(let [~g ~expr
+;;            ~@(interleave (repeat g) (butlast steps))]
+;;        ~(if (empty? steps)
+;;           g
+;;           (last steps)))))
 
-(defmacro cond->> [expr & clauses]
-  ;;    (assert (even? (count clauses)))
-  (let [g     (gensym)
-        steps (map (fn [clause]
-                     (let [test (first clause)
-                           step (second clause)]
-                       `(if ~test (->> ~g ~step) ~g)))
-                   (partition 2 clauses))]
-    `(let [~g ~expr
-           ~@(interleave (repeat g) (butlast steps))]
-       ~(if (empty? steps)
-          g
-          (last steps)))))
+;; (defmacro cond->> [expr & clauses]
+;;   ;;    (assert (even? (count clauses)))
+;;   (let [g     (gensym)
+;;         steps (map (fn [clause]
+;;                      (let [test (first clause)
+;;                            step (second clause)]
+;;                        `(if ~test (->> ~g ~step) ~g)))
+;;                    (partition 2 clauses))]
+;;     `(let [~g ~expr
+;;            ~@(interleave (repeat g) (butlast steps))]
+;;        ~(if (empty? steps)
+;;           g
+;;           (last steps)))))
 
-(defmacro as-> [expr name & forms]
-  `(let [~name ~expr
-         ~@(interleave (repeat name) forms)]
-     ~name))
+;; (defmacro as-> [expr name & forms]
+;;   `(let [~name ~expr
+;;          ~@(interleave (repeat name) forms)]
+;;      ~name))
 
-(defmacro some-> [expr & forms]
-  (let [g     (gensym)
-        pstep (fn [step] `(if (nil? ~g) nil (-> ~g ~step)))]
-    `(let [~g ~expr
-           ~@(interleave (repeat g) (map pstep forms))]
-       ~g)))
+;; (defmacro some-> [expr & forms]
+;;   (let [g     (gensym)
+;;         pstep (fn [step] `(if (nil? ~g) nil (-> ~g ~step)))]
+;;     `(let [~g ~expr
+;;            ~@(interleave (repeat g) (map pstep forms))]
+;;        ~g)))
 
-(defmacro some->> [expr & forms]
-  (let [g     (gensym)
-        pstep (fn [step] `(if (nil? ~g) nil (->> ~g ~step)))]
-    `(let [~g ~expr
-           ~@(interleave (repeat g) (map pstep forms))]
-       ~g)))
+;; (defmacro some->> [expr & forms]
+;;   (let [g     (gensym)
+;;         pstep (fn [step] `(if (nil? ~g) nil (->> ~g ~step)))]
+;;     `(let [~g ~expr
+;;            ~@(interleave (repeat g) (map pstep forms))]
+;;        ~g)))

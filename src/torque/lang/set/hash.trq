@@ -8,19 +8,22 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns torque.lang.set.hash
-  (:use
-    [torque.lang.boot]
-    [torque.lang.def]
-    [torque.lang.map]
-    [torque.lang.predicates])
   (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot :refer :all]
+    [torque.lang.def :refer :all]
+    [torque.lang.algo :refer :all]
+    [torque.lang.map :refer :all]
+    [torque.lang.predicates :refer :all]
     [torque.lang.common.seq :as seq]))
 
 (deftype PersistentHashSet [meta hash-map]
 
   IPrintable
   (-str [this]
-    (seq/pr-str "#{" "}" this))
+    "HashSet"
+    ;; (seq/pr-str "#{" "}" this)
+    )
 
   ICloneable
   (-clone [_]
@@ -37,12 +40,12 @@
   (-conj [coll o]
     (new PersistentHashSet meta (assoc hash-map o nil)))
 
-  IEquiv
-  (-equiv [o other]
-    (and
-      (set? other)
-      (== (count o) (count other))
-      (every? (fn [x] (contains? o x)) other)))
+  ;; IEquiv
+  ;; (-equiv [o other]
+  ;;   (and
+  ;;     (set? other)
+  ;;     (== (count o) (count other))
+  ;;     (every? (fn [x] (contains? o x)) other)))
 
   ISeqable
   (-seq [o]

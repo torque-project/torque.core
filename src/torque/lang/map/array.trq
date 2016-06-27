@@ -8,13 +8,12 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns torque.lang.map.array
-  (:use
-    [torque.lang.boot]
-    [torque.lang.cons]
-    [torque.lang.let]
-    [torque.lang.seq]
-    [torque.lang.vector])
   (:require
+    [torque.lang.boot :refer :all]
+    [torque.lang.cons :refer :al]
+    [torque.lang.let :refer :all]
+    [torque.lang.seq :refer :all]
+    [torque.lang.vector :refer :all]
     [torque.lang.common.seq :as seq]))
 
 (def lookup-sentinel ::lookup-sentinel)
@@ -42,9 +41,9 @@
 
 (deftype PersistentArrayMapSeq [arr i meta]
 
-  IPrintable
-  (-str [this]
-    (seq/pr-str "(" ")" this))
+  ;; IPrintable
+  ;; (-str [this]
+  ;;   (seq/pr-str "(" ")" this))
 
   IMeta
   (-meta [o] meta)
@@ -90,9 +89,9 @@
 
 (deftype PersistentArrayMap [meta cnt arr]
 
-  IPrintable
-  (-str [this]
-    (seq/pr-str "{" "}" (new IndexedSeq arr 0)))
+  ;; IPrintable
+  ;; (-str [this]
+  ;;   (seq/pr-str "{" "}" (new IndexedSeq arr 0)))
 
   ICloneable
   (-clone [_]

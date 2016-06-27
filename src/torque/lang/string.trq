@@ -19,7 +19,15 @@
   (-intptr [o] (-intptr data))
 
   ICounted
-  (-count [o] length))
+  (-count [o] length)
+
+  IEquiv
+  (-equiv [_ other]
+    (if (instance? String other)
+      (if (== length (-count other))
+        (= data (-bytes other))
+        false)
+      false)))
 
 (def string?
   (fn* string? [x]

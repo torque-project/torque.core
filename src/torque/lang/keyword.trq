@@ -8,35 +8,38 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns torque.lang.keyword
-  (:use
-    [torque.lang.protocols]
-    [torque.lang.boot]
-    [torque.lang.def]
-    [torque.lang.string]))
+  (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot :refer :all]
+    [torque.lang.string :refer :all]))
 
 (deftype Keyword [namespace name fqn]
 
   IPrintable
-  (-str [this] (str ":" fqn))
+  (-str [this]
+    "Keyword"
+    ;;(str ":" fqn)
+    )
 
   INamed
   (-name [x] name)
   (-namespace [x] namespace)
 
-  IEquiv
-  (-equiv [o other]
-    (if (instance? Keyword other)
-      (= fqn (. other fqn))
-      false))
+  ;; IEquiv
+  ;; (-equiv [o other]
+  ;;   (if (instance? Keyword other)
+  ;;     (= fqn (. other fqn))
+  ;;     false))
 
-  IFn
-  (-invoke [this a]
-    (-invoke this a nil))
-  (-invoke [this a b]
-    (if (nil? a) b (-lookup a this b))))
+  ;; IFn
+  ;; (-invoke [this a]
+  ;;   (-invoke this a nil))
+  ;; (-invoke [this a b]
+  ;;   (if (nil? a) b (-lookup a this b)))
+  )
 
-(defn keyword? [x]
-  (instance? Keyword x))
+;; (defn keyword? [x]
+;;   (instance? Keyword x))
 
-(defn keyword [name]
-  (new Keyword nil name name))
+;; (defn keyword [name]
+;;   (new Keyword nil name name))

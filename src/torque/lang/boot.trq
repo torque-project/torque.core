@@ -57,15 +57,19 @@
 
 (def =
   (fn* = [a b]
-       (if (identical? a b)
-         true
-         (if (satisfies? IEquiv a)
-           (-equiv a b)
-           false))))
+    (if (identical? a b)
+      true
+      (if a
+        (if b
+          (if (satisfies? IEquiv a)
+            (-equiv a b)
+            false)
+          false)
+        false))))
 
-;; (def integer?
-;;   (fn* integer? [x]
-;;     (torque.core.builtin/integer? x)))
+(def integer?
+  (fn* integer? [x]
+    (torque.core.builtin/integer? x)))
 
 (def binary?
   (fn* binary? [x]
@@ -131,9 +135,6 @@
 (def make-array
   (fn* make-array [n] (torque.core.builtin/make-array n)))
 
-;; (def aclone
-;;   (fn* aclone [a] (torque.core.builtin/aclone a)))
-
 ;; (def acopy
 ;;   (fn* acopy [dst src off len]
 ;;     (torque.core.builtin/acopy dst src off len)))
@@ -149,6 +150,19 @@
 
 (def array
   (fn* array [& vs] vs))
+
+(def acopy
+  (fn* acopy [dst src off len]
+    (loop* [n off]
+      (if (< n len)
+        (do
+          (aset dst n (aget src n))
+          (recur (inc n)))))
+    dst))
+
+(def aclone
+  (fn* aclone [a]
+    (acopy (make-array a) a 0 (alength a))))
 
 ;; (def type?
 ;;   (fn* type? [x]
@@ -209,21 +223,21 @@
         nil)
       nil)))
 
-;; (deftype Reduced [val]
-;;   IDeref
-;;   (-deref [o] val))
+(deftype Reduced [val]
+  IDeref
+  (-deref [o] val))
 
-;; (def reduced
-;;   (fn* reduced [x]
-;;     (new Reduced x)))
+(def reduced
+  (fn* reduced [x]
+    (new Reduced x)))
 
-;; (def reduced?
-;;   (fn* reduced? [r]
-;;     (instance? Reduced r)))
+(def reduced?
+  (fn* reduced? [r]
+    (instance? Reduced r)))
 
-;; (def deref
-;;   (fn* deref [o]
-;;     (-deref o)))
+(def deref
+  (fn* deref [o]
+    (-deref o)))
 
 ;; ;; FIXME: crutches for devleopment. remove these later
 

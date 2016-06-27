@@ -8,14 +8,15 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns torque.lang.range
-  (:use
-    [torque.lang.boot]
-    [torque.lang.limits]
-    [torque.lang.protocols]
-    [torque.lang.def]
-    [torque.lang.exceptions]
-    [torque.lang.seq])
   (:require
+    [torque.lang.boot :refer :all]
+    [torque.lang.limits :refer :all]
+    [torque.lang.protocols :refer :all]
+    [torque.lang.cons :refer :all]
+    [torque.lang.def :refer :all]
+    [torque.lang.exceptions :refer :all]
+    [torque.lang.seq :refer :all]
+    [torque.lang.predicates :refer :all]
     [torque.lang.common.seq :as seq]))
 
 (declare ceil)
@@ -24,7 +25,9 @@
 
   IPrintable
   (-str [this]
-    (seq/pr-str "(" ")" this))
+    "Range"
+    ;; (seq/pr-str "(" ")" this)
+    )
 
   ICloneable
   (-clone [_]
@@ -81,7 +84,10 @@
       (+ start (* n step))
       (if (and (> start end) (zero? step))
         start
-        (throw (ex-info "Index out of bounds" {:n n})))))
+        nil
+        ;; FIXME: throw doesn't work yet
+        ;; (throw (ex-info "Index out of bounds" {:n n}))
+        )))
   (-nth [coll n not-found]
     (if (< n (-count coll))
       (+ start (* n step))

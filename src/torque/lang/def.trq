@@ -1,11 +1,12 @@
 ;; -*- mode: clojure;-*-
 
 (ns torque.lang.def
-  (:use
-    [torque.lang.protocols]
-    [torque.lang.boot]
-    [torque.lang.list]
-    [torque.lang.let]))
+  (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot :refer :all]
+    [torque.lang.string :refer :all]
+    [torque.lang.list :refer :all]
+    [torque.lang.let :refer :all]))
 
 ;; This defones the fn macro for the first time as a simple forward to
 ;; fn*. Later on this will be redefined with destructuring and other

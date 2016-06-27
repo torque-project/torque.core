@@ -8,16 +8,14 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns torque.lang.symbol
-  (:use
-    [torque.lang.protocols]
-    [torque.lang.boot]
-    [torque.lang.def]
-    [torque.lang.atom]))
+  (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot :refer :all]))
 
 (deftype Symbol [meta namespace name fqn]
 
   IPrintable
-  (-str [_] fqn)
+  (-str [this] fqn)
 
   IWithMeta
   (-with-meta [_ meta]
@@ -33,31 +31,39 @@
   IEquiv
   (-equiv [_ other]
     (if (instance? Symbol other)
-      (= fqn (. other fqn))
+      (if (= namespace (-namespace other))
+        (= name (-name other))
+        false)
       false)))
 
-(defn symbol? [x]
-  #?(:rev     (torque.core.builtin/symbol? x)
-     :default (instance? Symbol x)))
+;; (def symbol?
+;;   (fn* symbol? [x]
+;;     #?(:rev     (torque.core.builtin/symbol? x)
+;;        :default (instance? Symbol x))))
 
-(defn symbol [name]
-  (new Symbol nil nil name name))
+;; (def symbol?
+;;   (fn* symbol? [x]
+;;     (instance? Symbol x)))
 
-(defn name [x]
-  (if (satisfies? INamed x)
-    (-name x)
-    (when (string? x)
-      x)))
+;; (def symbol
+;;   (fn* symbol [name]
+;;     (new Symbol nil nil name name)))
 
-(defn namespace [x]
-  (-namespace x))
+;; (defn name [x]
+;;   (if (satisfies? INamed x)
+;;     (-name x)
+;;     (when (string? x)
+;;       x)))
 
-(def ^:private gensym-counter (atom 0))
+;; (defn namespace [x]
+;;   (-namespace x))
 
-(defn gensym
-  ([]
-   (gensym "__SYM__"))
-  ([prefix-string]
-   (let [id  (swap! gensym-counter inc)
-         fqn (str prefix-string id)]
-     (symbol fqn))))
+;; (def ^:private gensym-counter (atom 0))
+
+;; (defn gensym
+;;   ([]
+;;    (gensym "__SYM__"))
+;;   ([prefix-string]
+;;    (let [id  (swap! gensym-counter inc)
+;;          fqn (str prefix-string id)]
+;;      (symbol fqn))))

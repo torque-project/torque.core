@@ -8,21 +8,23 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns torque.lang.atom
-  (:use
-    [torque.lang.protocols]
-    [torque.lang.boot]
-    [torque.lang.exceptions]
-    [torque.lang.def]
-    [torque.lang.flow]
-    [torque.lang.predicates]
-    [torque.lang.algo]
-    [torque.lang.string]))
+  (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot :refer :all]
+    [torque.lang.exceptions :refer :all]
+    [torque.lang.def :refer :all]
+    [torque.lang.flow :refer :all]
+    [torque.lang.predicates :refer :all]
+    [torque.lang.algo :refer :all]
+    [torque.lang.string :refer :all]))
 
 (deftype Atom [state meta validator watches]
 
   IPrintable
   (-str [_]
-    (str "#<Atom " (-str state) ">"))
+    "Atom"
+    ;; (str "#<Atom " (-str state) ">")
+    )
 
   IEquiv
   (-equiv [o other] (identical? o other))

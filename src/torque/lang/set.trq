@@ -10,9 +10,11 @@
 (ns torque.lang.set
   (:inherit
     [torque.lang.set.hash])
-  (:use
-    [torque.lang.boot]
-    [torque.lang.def]))
+  (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot :refer :all]
+    [torque.lang.def :refer :all]
+    [torque.lang.algo :refer :all]))
 
 (defn set [coll]
   (reduce -conj (hash-set) coll))

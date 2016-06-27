@@ -8,10 +8,10 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns torque.lang.common.node
-  (:use
-    [torque.lang.boot]
-    [torque.lang.let]
-    [torque.lang.def]))
+  (:require
+    [torque.lang.boot :refer :all]
+    [torque.lang.let :refer :all]
+    [torque.lang.def :refer :all]))
 
 (deftype VectorNode [edit arr])
 

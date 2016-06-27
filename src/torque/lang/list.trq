@@ -4,8 +4,9 @@
   (:require
     [torque.lang.protocols :refer :all]
     [torque.lang.boot :refer :all]
+    [torque.lang.common.seq :as seq]
     ;; [torque.lang.string :refer (str)]
-    [torque.lang.common.seq :as seq]))
+    ))
 
 (deftype List [meta first rest count]
 
@@ -87,7 +88,7 @@
 (def list
   (fn* list [& xs]
     (loop* [out (empty-list)
-            n   (alength xs)]
+            n   (dec (alength xs))]
       (if (<= 0 n)
         (recur (-conj out (aget xs n))
                (dec n))

@@ -1,9 +1,9 @@
 (ns torque.lang.exceptions
-  (:use
-    [torque.lang.protocols]
-    [torque.lang.boot]
-    [torque.lang.string]
-    [torque.lang.cons]))
+  (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot :refer :all]
+    [torque.lang.string  :refer :all]
+    [torque.lang.cons :refer :all]))
 
 (deftype ExceptionInfo [message data cause]
 
@@ -30,19 +30,21 @@
 
 (def ^:macro throw
   (fn* throw [x]
-    (list 'torque.core.builtin/throw x)))
+    (torque.core.builtin/print (-intptr "THROW"))
+    ;;(list 'torque.core.builtin/throw x)
+    ))
 
-(def ^:macro try
-  (fn* [& body]
-    (if body
-      (let* [forms (loop* [xs    body
-                           forms '()]
-                     (if (-next xs)
-                       (recur (-next xs)
-                              (cons (-first xs) forms))
-                       [forms (-first xs)]))]
-        ;; TODO: do try*/catch* once it's implemented
-        (cons 'do (-nth forms 0))))))
+;; (def ^:macro try
+;;   (fn* [& body]
+;;     (if body
+;;       (let* [forms (loop* [xs    body
+;;                            forms '()]
+;;                      (if (-next xs)
+;;                        (recur (-next xs)
+;;                               (cons (-first xs) forms))
+;;                        [forms (-first xs)]))]
+;;         ;; TODO: do try*/catch* once it's implemented
+;;         (cons 'do (-nth forms 0))))))
 
 ;; TODO: add *assert* flag
 ;; (def ^:macro assert

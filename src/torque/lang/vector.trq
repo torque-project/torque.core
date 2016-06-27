@@ -8,36 +8,37 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns torque.lang.vector
-  (:use
-    [torque.lang.protocols]
-    [torque.lang.boot]
-    [torque.lang.exceptions]
-    [torque.lang.flow]
-    [torque.lang.let]
-    [torque.lang.def]
-    [torque.lang.indexed]
-    [torque.lang.chunked]
-    [torque.lang.common.node])
   (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot  :refer :all]
+    [torque.lang.exceptions  :refer :all]
+    [torque.lang.flow  :refer :all]
+    [torque.lang.let  :refer :all]
+    [torque.lang.def  :refer :all]
+    [torque.lang.indexed  :refer :all]
+    [torque.lang.chunked  :refer :all]
+    [torque.lang.common.node :refer :all]
     [torque.lang.common.seq :as seq]))
 
 (declare extend-root extend-tail do-assoc)
 
 (defn throw-out-of-bounds [n]
-  (throw
-    (ex-info (str "Out of bounds error when associating in vector: " n)
-      {:index n})))
+  ;; (throw
+  ;;   (ex-info (str "Out of bounds error when associating in vector: " n)
+  ;;            {:index n}))
+  )
 
 (defn throw-not-an-index [x]
-  (throw
-    (ex-info (str "Vector index has to be an integer: " x)
-      {:index x})))
+  ;; (throw
+  ;;   (ex-info (str "Vector index has to be an integer: " x)
+  ;;            {:index x}))
+  )
 
 (deftype PersistentVector [meta cnt shift root tail]
 
-  IPrintable
-  (-str [this]
-    (seq/pr-str "[" "]" this))
+  ;; IPrintable
+  ;; (-str [this]
+  ;;   (seq/pr-str "[" "]" this))
 
   ICloneable
   (-clone [_]
@@ -221,7 +222,7 @@
       v)))
 
 (defn vector [& args]
-  (vec args))
+  (vec (array-seq args)))
 
 (defn vector? [x]
   (satisfies? IVector x))

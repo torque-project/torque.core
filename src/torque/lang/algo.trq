@@ -8,24 +8,24 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns torque.lang.algo
-  (:use
-    [torque.lang.protocols]
-    [torque.lang.boot]
-    [torque.lang.cons]
-    [torque.lang.list]
-    [torque.lang.flow]
-    [torque.lang.let]
-    [torque.lang.def]
-    [torque.lang.lazy]
-    [torque.lang.seq]
-    [torque.lang.indexed]
-    [torque.lang.chunked]
-    [torque.lang.vector]
-    [torque.lang.map]
-    [torque.lang.squote]
-    [torque.lang.predicates]
-    [torque.lang.symbol])
   (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot :refer :all]
+    [torque.lang.cons :refer :all]
+    [torque.lang.list :refer :all]
+    [torque.lang.exceptions :refer :all]
+    [torque.lang.flow :refer :all]
+    [torque.lang.let :refer :all]
+    [torque.lang.def :refer :all]
+    [torque.lang.lazy :refer :all]
+    [torque.lang.seq :refer :all]
+    [torque.lang.indexed :refer :all]
+    [torque.lang.chunked :refer :all]
+    [torque.lang.vector :refer :all]
+    [torque.lang.map :refer :all]
+    [torque.lang.squote :refe :all]
+    [torque.lang.predicates :refer :all]
+    [torque.lang.symbol :refer :all]
     [torque.lang.common.seq :as seq]))
 
 (def ^:macro dotimes
@@ -67,7 +67,7 @@
   [coll] (when (seq coll) coll))
 
 (defn count [coll]
-  (if-not (nil? coll)
+  (if (not (nil? coll))
     (if (satisfies? ICounted coll)
       (-count coll)
       (if (array? coll)
@@ -75,35 +75,35 @@
         (seq/count coll)))
     0))
 
-(defn ^:private linear-traversal-nth
-  ([coll n]
-   (cond
-     (nil? coll)     (throw (ex-info "Index out of bounds" {}))
-     (zero? n)       (if (seq coll)
-                       (first coll)
-                       (throw (ex-info "Index out of bounds" {})))
-     (indexed? coll) (-nth coll n)
-     (seq coll)      (recur (next coll) (dec n))
-     :else           (throw (ex-info "Index out of bounds" {}))))
-  ([coll n not-found]
-   (cond
-     (nil? coll)     not-found
-     (zero? n)       (if (seq coll)
-                       (first coll)
-                       not-found)
-     (indexed? coll) (-nth coll n not-found)
-     (seq coll)      (recur (next coll) (dec n) not-found)
-     :else           not-found)))
+;; (defn ^:private linear-traversal-nth
+;;   ([coll n]
+;;    (cond
+;;      (nil? coll)     (throw (ex-info "Index out of bounds" {}))
+;;      (zero? n)       (if (seq coll)
+;;                        (first coll)
+;;                        (throw (ex-info "Index out of bounds" {})))
+;;      (indexed? coll) (-nth coll n)
+;;      (seq coll)      (recur (next coll) (dec n))
+;;      :else           (throw (ex-info "Index out of bounds" {}))))
+;;   ([coll n not-found]
+;;    (cond
+;;      (nil? coll)     not-found
+;;      (zero? n)       (if (seq coll)
+;;                        (first coll)
+;;                        not-found)
+;;      (indexed? coll) (-nth coll n not-found)
+;;      (seq coll)      (recur (next coll) (dec n) not-found)
+;;      :else           not-found)))
 
-(defn nth
-  ([coll n]
-   (if (satisfies? IIndexed coll)
-     (-nth coll n)
-     (linear-traversal-nth coll n)))
-  ([coll n not-found]
-   (if (satisfies? IIndexed coll)
-     (-nth coll n not-found)
-     (linear-traversal-nth coll n not-found))))
+;; (defn nth
+;;   ([coll n]
+;;    (if (satisfies? IIndexed coll)
+;;      (-nth coll n)
+;;      (linear-traversal-nth coll n)))
+;;   ([coll n not-found]
+;;    (if (satisfies? IIndexed coll)
+;;      (-nth coll n not-found)
+;;      (linear-traversal-nth coll n not-found))))
 
 (defn conj
   ([] [])
@@ -173,14 +173,15 @@
 
 (defn zipmap
   [keys vals]
-  (loop [map {}
-         ks  (seq keys)
-         vs  (seq vals)]
+  ;; FIXME: crashes with {}
+  (loop [m  (hash-map)
+         ks (seq keys)
+         vs (seq vals)]
     (if (and ks vs)
-      (recur (assoc map (first ks) (first vs))
+      (recur (assoc m (first ks) (first vs))
              (next ks)
              (next vs))
-      map)))
+      m)))
 
 (defn reduce
   ([f coll]
@@ -213,7 +214,8 @@
    (into [] (apply map f c1 c2 c3 colls))))
 
 (defn butlast [s]
-  (loop [ret [] s s]
+  (loop [ret []
+         s   s]
     (if (next s)
       (recur (conj ret (first s)) (next s))
       (seq ret))))
@@ -231,18 +233,18 @@
        (cons (first s) (take-while pred (rest s)))))))
 
 (defn drop [n coll]
-  (let [step (fn [n coll]
+  (let [step (fn step [n coll]
                (let [s (seq coll)]
                  (if (and (pos? n) s)
-                   (recur (dec n) (rest s))
+                   (step (dec n) (rest s))
                    s)))]
     (lazy-seq (step n coll))))
 
 (defn drop-while [pred coll]
-  (let [step (fn [pred coll]
+  (let [step (fn step [pred coll]
                (let [s (seq coll)]
                  (if (and s (pred (first s)))
-                   (recur pred (rest s))
+                   (step pred (rest s))
                    s)))]
     (lazy-seq (step pred coll))))
 
@@ -338,33 +340,33 @@
 ;;   (filter (fn [x] (not (sequential? x)))
 ;;           (rest (tree-seq sequential? seq x))))
 
-(defn fnil
-  ([f x]
-   (fn
-     ([a]
-      (f (if (nil? a) x a)))
-     ([a b]
-      (f (if (nil? a) x a) b))
-     ([a b c]
-      (f (if (nil? a) x a) b c))
-     ([a b c & ds]
-      (apply f (if (nil? a) x a) b c ds))))
-  ([f x y]
-   (fn
-     ([a b]
-      (f (if (nil? a) x a) (if (nil? b) y b)))
-     ([a b c]
-      (f (if (nil? a) x a) (if (nil? b) y b) c))
-     ([a b c & ds]
-      (apply f (if (nil? a) x a) (if (nil? b) y b) c ds))))
-  ([f x y z]
-   (fn
-     ([a b]
-      (f (if (nil? a) x a) (if (nil? b) y b)))
-     ([a b c]
-      (f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c)))
-     ([a b c & ds]
-      (apply f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c) ds)))))
+;; (defn fnil
+;;   ([f x]
+;;    (fn
+;;      ([a]
+;;       (f (if (nil? a) x a)))
+;;      ([a b]
+;;       (f (if (nil? a) x a) b))
+;;      ([a b c]
+;;       (f (if (nil? a) x a) b c))
+;;      ([a b c & ds]
+;;       (apply f (if (nil? a) x a) b c ds))))
+;;   ([f x y]
+;;    (fn
+;;      ([a b]
+;;       (f (if (nil? a) x a) (if (nil? b) y b)))
+;;      ([a b c]
+;;       (f (if (nil? a) x a) (if (nil? b) y b) c))
+;;      ([a b c & ds]
+;;       (apply f (if (nil? a) x a) (if (nil? b) y b) c ds))))
+;;   ([f x y z]
+;;    (fn
+;;      ([a b]
+;;       (f (if (nil? a) x a) (if (nil? b) y b)))
+;;      ([a b c]
+;;       (f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c)))
+;;      ([a b c & ds]
+;;       (apply f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c) ds)))))
 
 (defn find [coll k]
   (when (and (not (nil? coll))
@@ -407,32 +409,32 @@
       (assoc m k (assoc-in (get m k) ks v))
       (assoc m k v))))
 
-(defn update-in
-  ([m ks f]
-   (let [k (first ks)]
-     (if-let [ks (next ks)]
-       (assoc m k (update-in (get m k) ks f))
-       (assoc m k (f (get m k))))))
-  ([m ks f a]
-   (let [k (first ks)]
-     (if-let [ks (next ks)]
-       (assoc m k (update-in (get m k) ks f a))
-       (assoc m k (f (get m k) a)))))
-  ([m ks f a b]
-   (let [k (first ks)]
-     (if-let [ks (next ks)]
-       (assoc m k (update-in (get m k) ks f a b))
-       (assoc m k (f (get m k) a b)))))
-  ([m ks f a b c]
-   (let [k (first ks)]
-     (if-let [ks (next ks)]
-       (assoc m k (update-in (get m k) ks f a b c))
-       (assoc m k (f (get m k) a b c)))))
-  ([m ks f a b c & args]
-   (let [k (first ks)]
-     (if-let [ks (next ks)]
-       (assoc m k (apply update-in (get m k) ks f a b c args))
-       (assoc m k (apply f (get m k) a b c args))))))
+;; (defn update-in
+;;   ([m ks f]
+;;    (let [k (first ks)]
+;;      (if-let [ks (next ks)]
+;;        (assoc m k (update-in (get m k) ks f))
+;;        (assoc m k (f (get m k))))))
+;;   ([m ks f a]
+;;    (let [k (first ks)]
+;;      (if-let [ks (next ks)]
+;;        (assoc m k (update-in (get m k) ks f a))
+;;        (assoc m k (f (get m k) a)))))
+;;   ([m ks f a b]
+;;    (let [k (first ks)]
+;;      (if-let [ks (next ks)]
+;;        (assoc m k (update-in (get m k) ks f a b))
+;;        (assoc m k (f (get m k) a b)))))
+;;   ([m ks f a b c]
+;;    (let [k (first ks)]
+;;      (if-let [ks (next ks)]
+;;        (assoc m k (update-in (get m k) ks f a b c))
+;;        (assoc m k (f (get m k) a b c)))))
+;;   ([m ks f a b c & args]
+;;    (let [k (first ks)]
+;;      (if-let [ks (next ks)]
+;;        (assoc m k (apply update-in (get m k) ks f a b c args))
+;;        (assoc m k (apply f (get m k) a b c args))))))
 
 (defn merge [& maps]
   (when (some identity maps)
@@ -460,13 +462,13 @@
                x))
       res)))
 
-(def ^:macro doto
-  (fn doto [x & forms]
-    (let [gx (gensym)]
-      `(let* [~gx ~x]
-         ~@(map (fn [f]
-                  (if (seq? f)
-                    `(~(first f) ~gx ~@(next f))
-                    `(~f ~gx)))
-                forms)
-         ~gx))))
+;; (defmacro doto
+;;   (fn doto [x & forms]
+;;     (let [gx (gensym)]
+;;       `(let* [~gx ~x]
+;;          ~@(map (fn [f]
+;;                   (if (seq? f)
+;;                     `(~(first f) ~gx ~@(next f))
+;;                     `(~f ~gx)))
+;;                 forms)
+;;          ~gx))))

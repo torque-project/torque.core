@@ -10,19 +10,18 @@
 (ns torque.lang.map
   (:inherit
     [torque.lang.map.array])
-  (:use
-    [torque.lang.boot]
-    [torque.lang.cons]
-    [torque.lang.let]
-    [torque.lang.seq])
   (:require
+    [torque.lang.boot :refer :all]
+    [torque.lang.cons :refer :all]
+    [torque.lang.let  :refer :all]
+    [torque.lang.seq  :refer :all]
     [torque.lang.common.seq :as seq]))
 
 (deftype KeySeq [mseq meta]
 
-  IPrintable
-  (-str [this]
-    (seq/pr-str "(" ")" this))
+  ;; IPrintable
+  ;; (-str [this]
+  ;;   (seq/pr-str "(" ")" this))
 
   IMeta
   (-meta [o] meta)
@@ -65,9 +64,9 @@
 
 (deftype ValSeq [mseq meta]
 
-  IPrintable
-  (-str [this]
-    (seq/pr-str "(" ")" this))
+  ;; IPrintable
+  ;; (-str [this]
+  ;;   (seq/pr-str "(" ")" this))
 
   IMeta
   (-meta [o] meta)

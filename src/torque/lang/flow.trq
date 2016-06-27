@@ -8,12 +8,12 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns torque.lang.flow
-  (:use
-    [torque.lang.protocols]
-    [torque.lang.boot]
-    [torque.lang.exceptions]
-    [torque.lang.list]
-    [torque.lang.cons]))
+  (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot :refer :all]
+    [torque.lang.exceptions :refer :all]
+    [torque.lang.list :refer :all]
+    [torque.lang.cons :refer :all]))
 
 (def ^:macro when
   (fn* when [test & body]
@@ -33,6 +33,7 @@
       (list 'if (-first clauses)
             (if (-next clauses)
               (-first (-next clauses))
-              (throw (ex-info "cond requires an even number of forms" {})))
+              ;; (throw (ex-info "cond requires an even number of forms" {}))
+              nil)
             (cons 'torque.lang.flow/cond
                   (-next (-next clauses)))))))

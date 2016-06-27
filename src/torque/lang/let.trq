@@ -1,11 +1,11 @@
 ;; -*- mode: clojure;-*-
 
 (ns torque.lang.let
-  (:use
-    [torque.lang.protocols]
-    [torque.lang.boot]
-    [torque.lang.list]
-    [torque.lang.cons]))
+  (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot :refer :all]
+    [torque.lang.list :refer :all]
+    [torque.lang.cons :refer :all]))
 
 (def ^:macro let
   (fn* let [& forms]
@@ -32,4 +32,3 @@
 (def ^:macro binding
   (fn* loop [& forms]
     (cons 'binding* forms)))
-

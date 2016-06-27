@@ -8,9 +8,11 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns torque.lang.indexed
-  (:use
-    [torque.lang.protocols]
-    [torque.lang.boot]))
+  (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot :refer :all]
+    [torque.lang.def :refer :all]
+    [torque.lang.common.seq :as seq]))
 
 (deftype IndexedSeq [arr i]
 
