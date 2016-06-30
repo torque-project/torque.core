@@ -8,16 +8,16 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns torque.lang.hierarchy
-  (:use
-    [torque.lang.protocols]
-    [torque.lang.boot]
-    [torque.lang.list]
-    [torque.lang.def]
-    [torque.lang.flow]
-    [torque.lang.seq]
-    [torque.lang.predicates]
-    [torque.lang.algo]
-    [torque.lang.atom]))
+  (:require
+    [torque.lang.protocols :refer :all]
+    [torque.lang.boot :refer :all]
+    [torque.lang.list :refer :all]
+    [torque.lang.def :refer :all]
+    [torque.lang.flow :refer :all]
+    [torque.lang.seq :refer :all]
+    [torque.lang.predicates :refer :all]
+    [torque.lang.algo :refer :all]
+    [torque.lang.atom :refer :all]))
 
 (defn make-hierarchy []
   {:parents     {}

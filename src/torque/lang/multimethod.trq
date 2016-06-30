@@ -8,19 +8,21 @@
 ;;   You must not remove this notice, or any other, from this software.
 
 (ns torque.lang.multimethod
-  (:use
-    [torque.lang.boot]
-    [torque.lang.protocols]
-    [torque.lang.def]
-    [torque.lang.flow]
-    [torque.lang.exceptions]
-    [torque.lang.predicates]
-    [torque.lang.algo]
-    [torque.lang.seq]
-    [torque.lang.map]
-    [torque.lang.atom]
-    [torque.lang.hierarchy]
-    [torque.lang.string]))
+  (:require
+    [torque.lang.boot :refer :all]
+    [torque.lang.protocols :refer :all]
+    [torque.lang.def :refer :all]
+    [torque.lang.flow :refer :all]
+    [torque.lang.let :refer :all]
+    [torque.lang.exceptions :refer :all]
+    [torque.lang.indexed :refer :all]
+    [torque.lang.predicates :refer :all]
+    [torque.lang.algo :refer :all]
+    [torque.lang.seq :refer :all]
+    [torque.lang.map :refer :all]
+    [torque.lang.atom :refer :all]
+    [torque.lang.hierarchy :refer :all]
+    [torque.lang.string :refer :all]))
 
 (defprotocol IMultiFn
   (-reset [mf])
@@ -141,15 +143,16 @@
       (when-not target-fn
         (throw-no-method name dispatch-val))
       (target-fn a b c d e)))
-  (-invoke [this a b c d e f]
-    (let [dispatch-val (dispatch-fn a b c d e f)
-          target-fn (-get-method this dispatch-val)]
-      (when-not target-fn
-        (throw-no-method name dispatch-val))
-      (target-fn a b c d e f))))
+  ;; (-invoke [this a b c d e f]
+  ;;   (let [dispatch-val (dispatch-fn a b c d e f)
+  ;;         target-fn (-get-method this dispatch-val)]
+  ;;     (when-not target-fn
+  ;;       (throw-no-method name dispatch-val))
+  ;;     (target-fn a b c d e f)))
+  )
 
 (defmacro defmulti [name dispatch-fn & options]
-  (let [options (apply array-map options)
+  (let [options (apply array-map (array-seq options))
         default (get options :default :default)]
     `(def ~name
        (let [methods#      (atom {})
@@ -165,3 +168,4 @@
 
 (defmacro defmethod [multifn dispatch-val & fn-tail]
   `(-add-method ~multifn ~dispatch-val (fn ~@fn-tail)))
+

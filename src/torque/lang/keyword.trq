@@ -15,6 +15,12 @@
 
 (deftype Keyword [namespace name fqn]
 
+  IFn
+  (-invoke [this a]
+    (-invoke this a nil))
+  (-invoke [this a b]
+    (if (nil? a) b (-lookup a this b)))
+
   IPrintable
   (-str [this]
     "Keyword"
@@ -25,18 +31,14 @@
   (-name [x] name)
   (-namespace [x] namespace)
 
-  ;; IEquiv
-  ;; (-equiv [o other]
-  ;;   (if (instance? Keyword other)
-  ;;     (= fqn (. other fqn))
-  ;;     false))
-
-  ;; IFn
-  ;; (-invoke [this a]
-  ;;   (-invoke this a nil))
-  ;; (-invoke [this a b]
-  ;;   (if (nil? a) b (-lookup a this b)))
-  )
+  IEquiv
+  (-equiv [o other]
+    ;; FIXME: this is currently problematic while bootstrapping
+    ;; since we have two keyword types
+    ;; (if (instance? Keyword other)
+    ;;   (= fqn (. other fqn))
+    ;;   false)
+    false))
 
 ;; (defn keyword? [x]
 ;;   (instance? Keyword x))

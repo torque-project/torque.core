@@ -239,17 +239,11 @@
   (fn* deref [o]
     (-deref o)))
 
-;; ;; FIXME: crutches for devleopment. remove these later
+;; FIXME: crutches for development. remove these later
 
-;; (def print
-;;   (fn* [x]
-;;        (torque.core.builtin/print
-;;         (-intptr
-;;          (if (nil? x)
-;;            "nil"
-;;            (if (satisfies? IPrintable x)
-;;              (-str x)
-;;              "<unprintable>"))))))
+(def print
+  (fn* [x]
+    (torque.core.builtin/print (-intptr x))))
 
 ;; (def read
 ;;   (fn* [x]
