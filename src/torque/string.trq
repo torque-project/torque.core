@@ -151,3 +151,6 @@
    (join "" coll))
   ([sep coll]
    (apply str (interpose sep coll))))
+
+(defn replace [s pat replacement]
+  (join replacement (split s pat)))

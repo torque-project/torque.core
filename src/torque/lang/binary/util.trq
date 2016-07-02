@@ -12,7 +12,7 @@
      :offset offset
      :length (blength b)})))
 
-(def ^:private msb (bit-shift-left 0x1 7))
+(def msb (bit-shift-left 0x1 7))
 
-(defn ^:private signed? [byte]
+(defn signed? [byte]
   (== (bit-and byte msb) msb))

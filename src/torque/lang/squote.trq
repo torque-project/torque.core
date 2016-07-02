@@ -25,7 +25,7 @@
 (defn apply [f & args]
   (apply* f (collect args)))
 
-(defn ^:private cat [xys zs]
+(defn cat [xys zs]
   (lazy-seq
     (let [s (seq xys)]
       (if s
