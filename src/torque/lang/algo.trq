@@ -111,10 +111,8 @@
   ([coll x]
    (-conj coll x))
   ([coll x & args]
-   ;; FIXME: we don't support recur in variadic branches.
-   ;; replace this with something nicer later on
     (loop [out (conj coll x)
-           xs  args]
+           xs  (array-seq args)]
       (if xs
         (let [val (-first xs)]
           (recur (conj out val) (next xs)))
