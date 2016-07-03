@@ -214,6 +214,8 @@
 (defn empty-vector []
   (new PersistentVector nil 0 5 (empty-vector-node) (make-array 0)))
 
+(def empty (empty-vector))
+
 (defn vec [args]
   (loop [xs (seq args)
          v  (empty-vector)]

@@ -171,8 +171,7 @@
 
 (defn zipmap
   [keys vals]
-  ;; FIXME: crashes with {}
-  (loop [m  (hash-map)
+  (loop [m  {}
          ks (seq keys)
          vs (seq vals)]
     (if (and ks vs)
@@ -231,10 +230,10 @@
        (cons (first s) (take-while pred (rest s)))))))
 
 (defn drop [n coll]
-  (let [step (fn step [n coll]
+  (let [step (fn step [m coll]
                (let [s (seq coll)]
-                 (if (and (pos? n) s)
-                   (step (dec n) (rest s))
+                 (if (and s (pos? m))
+                   (step (dec m) (rest s))
                    s)))]
     (lazy-seq (step n coll))))
 
