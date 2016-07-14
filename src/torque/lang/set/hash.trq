@@ -21,9 +21,7 @@
 
   IPrintable
   (-str [this]
-    "HashSet"
-    ;; (seq/pr-str "#{" "}" this)
-    )
+    (seq/pr-str "#{" "}" this))
 
   ICloneable
   (-clone [_]

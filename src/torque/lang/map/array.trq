@@ -41,9 +41,9 @@
 
 (deftype PersistentArrayMapSeq [arr i meta]
 
-  ;; IPrintable
-  ;; (-str [this]
-  ;;   (seq/pr-str "(" ")" this))
+  IPrintable
+  (-str [this]
+    (seq/pr-str "(" ")" this))
 
   IMeta
   (-meta [o] meta)

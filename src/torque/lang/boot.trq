@@ -69,15 +69,21 @@
 
 (def integer?
   (fn* integer? [x]
-    (torque.core.builtin/integer? x)))
+    (if x
+      (torque.core.builtin/integer? x)
+      false)))
 
 (def binary?
   (fn* binary? [x]
-    (torque.core.builtin/binary? x)))
+    (if x
+      (torque.core.builtin/binary? x)
+      false)))
 
 (def array?
   (fn* array? [x]
-    (torque.core.builtin/array? x)))
+    (if x
+      (torque.core.builtin/array? x)
+      false)))
 
 (def type
   (fn* type [x] (torque.core.builtin/type x)))
@@ -98,39 +104,46 @@
 (def bget
   (fn* bget [b n]
     (if (binary? b)
-      (if (torque.core.builtin/< n (blength b))
+      (if (< n (blength b))
         (torque.core.builtin/bget b n)
         ;; TODO: throw
         nil)
       ;; TODO: throw
       nil)))
 
-;; (def binary*
-;;   (fn* [xs]
-;;     (let [size (loop* [out 0
-;;                        xs  (-seq xs)]
-;;                  (if xs
-;;                    (let* [x (-first xs)
-;;                           s (if (binary? x)
-;;                               (blength x)
-;;                               (if (integer? x)
-;;                                 1
-;;                                 ;; throw
-;;                                 0))]
-;;                      (recur (+ x s) (-next xs)))
-;;                    out))
-;;           bin  (make-binary size)]
-;;       (loop* [pos 0
-;;               xs  (-seq xs)]
-;;         (if xs
-;;           (let* [x   (-first xs)
-;;                  len (blength x)]
-;;             (bcopy bin pos x len)
-;;             (recur (+ pos len) (-next xs)))
-;;           bin)))))
+(def bset
+  (fn* bset [b n val]
+    (if (binary? b)
+      (if (< n (blength b))
+        (torque.core.builtin/bset b n val)
+        ;; FIXME: throw
+        nil)
+      ;; FIXME: throw
+      nil)))
 
-;; (def binary
-;;   (fn* binary [& vs] (binary* vs)))
+(def bcopy
+  (fn* bcopy [dst src off len]
+    (if (binary? dst)
+      (if (binary? src)
+        (if (<= (+ off len) (blength dst))
+          (do
+            (torque.core.builtin/mcopy
+              (+ (-intptr dst) off)
+              (-intptr src)
+              len)
+            dst)
+          ;; FIXME: throw
+          nil)
+        ;; FIXME: throw
+        nil)
+      ;; FIXME: throw
+      nil)))
+
+(def bclone
+  (fn* bclone [src]
+    (let* [len (blength src)
+           bin (make-binary len)]
+      (bcopy bin src 0 len))))
 
 (def make-array
   (fn* make-array [n] (torque.core.builtin/make-array n)))
@@ -163,6 +176,52 @@
 (def aclone
   (fn* aclone [a]
     (acopy (make-array a) a 0 (alength a))))
+
+(def ^:private io-size
+  (fn* io-size [x]
+    (if (binary? x)
+      (blength x)
+      (if (integer? x)
+        1
+        (if (satisfies? ISerializable x)
+          (blength (-bytes x))
+          ;; FIXME: throw
+          0)))))
+
+(def ^:private binary-size
+  (fn* binary-size [xs]
+    (let* [len (alength xs)]
+      (loop* [out 0
+              idx 0]
+        (if (< idx len)
+          (let* [x (aget xs idx)
+                 s (io-size x)]
+            (recur (+ out s) (inc idx)))
+          out)))))
+
+(def binary*
+  (fn* binary* [xs]
+    (let* [size (binary-size xs)
+           bin  (make-binary size)
+           len  (alength xs)]
+      (loop* [pos 0
+              idx 0]
+        (if (< idx len)
+          (let* [x (aget xs idx)
+                 s (io-size x)]
+            (if (binary? x)
+              (bcopy bin x pos s)
+              (if (integer? x)
+                (bset bin pos x)
+                (if (satisfies? ISerializable x)
+                  (bcopy bin (-bytes x) pos s)
+                  ;; FIXME: throw
+                  nil)))
+            (recur (+ pos s) (inc idx)))))
+      bin)))
+
+(def binary
+  (fn* binary [& vs] (binary* vs)))
 
 ;; (def type?
 ;;   (fn* type? [x]

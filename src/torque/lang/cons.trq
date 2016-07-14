@@ -19,8 +19,7 @@
 
   IPrintable
   (-str [this]
-    ;; (seq/pr-str "(" ")" this)
-    "Cons")
+    (seq/pr-str "(" ")" this))
 
   ICloneable
   (-clone [o]

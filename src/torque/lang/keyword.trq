@@ -23,7 +23,7 @@
 
   IPrintable
   (-str [this]
-    "Keyword"
+    fqn
     ;;(str ":" fqn)
     )
 
@@ -33,11 +33,16 @@
 
   IEquiv
   (-equiv [o other]
+    ;; (print "EQUIV")
     ;; FIXME: this is currently problematic while bootstrapping
     ;; since we have two keyword types
-    ;; (if (instance? Keyword other)
-    ;;   (= fqn (. other fqn))
-    ;;   false)
+    (if (instance? Keyword other)
+      (do
+        ;; (print "KEYWORD")
+        ;; (print fqn)
+        ;; (print (. other fqn))
+        (= fqn (. other fqn)))
+      false)
     false))
 
 ;; (defn keyword? [x]
