@@ -73,10 +73,13 @@
       (torque.core.builtin/integer? x)
       false)))
 
+;; TODO: maybe have a ABinary type protocol ?
 (def binary?
   (fn* binary? [x]
     (if x
-      (torque.core.builtin/binary? x)
+      (if (satisfies? ICounted x)
+        (satisfies? IPointerTarget x)
+        false)
       false)))
 
 (def array?
@@ -97,14 +100,14 @@
 (def blength
   (fn* blength [b]
     (if (binary? b)
-      (torque.core.builtin/blength b)
+      (-count b)
       ;; TODO: throw
       nil)))
 
 (def bget
   (fn* bget [b n]
     (if (binary? b)
-      (if (< n (blength b))
+      (if (< n (-count b))
         (torque.core.builtin/bget b n)
         ;; TODO: throw
         nil)
@@ -114,7 +117,7 @@
 (def bset
   (fn* bset [b n val]
     (if (binary? b)
-      (if (< n (blength b))
+      (if (< n (-count b))
         (torque.core.builtin/bset b n val)
         ;; FIXME: throw
         nil)
@@ -125,7 +128,7 @@
   (fn* bcopy [dst src off len]
     (if (binary? dst)
       (if (binary? src)
-        (if (<= (+ off len) (blength dst))
+        (if (<= (+ off len) (-count dst))
           (do
             (torque.core.builtin/mcopy
               (+ (-intptr dst) off)
@@ -133,15 +136,15 @@
               len)
             dst)
           ;; FIXME: throw
-          nil)
+          dst)
         ;; FIXME: throw
-        nil)
+        dst)
       ;; FIXME: throw
-      nil)))
+      dst)))
 
 (def bclone
   (fn* bclone [src]
-    (let* [len (blength src)
+    (let* [len (-count src)
            bin (make-binary len)]
       (bcopy bin src 0 len))))
 
@@ -159,7 +162,7 @@
   (fn* aset [a n v] (torque.core.builtin/aset a n v)))
 
 (def alength
-  (fn* [a] (torque.core.builtin/alength a)))
+  (fn* alength [a] (torque.core.builtin/alength a)))
 
 (def array
   (fn* array [& vs] vs))
@@ -180,11 +183,11 @@
 (def ^:private io-size
   (fn* io-size [x]
     (if (binary? x)
-      (blength x)
+      (-count x)
       (if (integer? x)
         1
         (if (satisfies? ISerializable x)
-          (blength (-bytes x))
+          (-count (-bytes x))
           ;; FIXME: throw
           0)))))
 

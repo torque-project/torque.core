@@ -56,4 +56,6 @@
   )
 
 (defn array-seq [arr]
-  (new IndexedSeq arr 0))
+  (if arr
+    (new IndexedSeq arr 0)
+    nil))

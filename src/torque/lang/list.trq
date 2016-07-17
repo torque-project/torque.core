@@ -56,7 +56,10 @@
     (seq/equiv o other))
 
   ISeqable
-  (-seq [o] o)
+  (-seq [o]
+    (if (== count 0)
+      nil
+      o))
 
   ICounted
   (-count [_] count)
@@ -71,11 +74,15 @@
   (fn* []
     (new List nil nil nil 0)))
 
+(def empty (empty-list))
+
 (def list
   (fn* list [& xs]
-    (loop* [out (empty-list)
-            n   (dec (alength xs))]
-      (if (<= 0 n)
-        (recur (-conj out (aget xs n))
-               (dec n))
-        out))))
+    (if (nil? xs)
+      empty
+      (loop* [out empty
+              n   (dec (alength xs))]
+        (if (<= 0 n)
+          (recur (-conj out (aget xs n))
+                 (dec n))
+          out)))))

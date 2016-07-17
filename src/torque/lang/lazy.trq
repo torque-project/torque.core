@@ -13,7 +13,8 @@
     [torque.lang.boot :refer :all]
     [torque.lang.flow :refer :all]
     [torque.lang.def :refer :all]
-    [torque.lang.indexed :refer :all]))
+    [torque.lang.indexed :refer :all]
+    [torque.lang.common.seq :as seq]))
 
 (defn sval [ls]
   (let* [f (. ls fn)]
@@ -24,22 +25,10 @@
 
 (deftype LazySeq [fn s]
 
-  ;; IPrintable
-  ;; (-str [this]
-  ;;   ;; TODO: use extend to use a common implementation
-  ;;   ;; with list and cons
-  ;;   (let [first (-first this)
-  ;;         rest  (-rest this)]
-  ;;     (str "("
-  ;;          (loop* [s ""
-  ;;                  f first
-  ;;                  r (seq rest)]
-  ;;                 (if r
-  ;;                   (recur (str s f " ")
-  ;;                          (-first r)
-  ;;                          (-next r))
-  ;;                   (str s f)))
-  ;;          ")")))
+  IPrintable
+  (-str [this]
+    ;; (seq/pr-str "(" ")" this)
+    "LazySeq")
 
   ISeq
   (-first [this]
