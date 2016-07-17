@@ -27,8 +27,18 @@
 
   IPrintable
   (-str [this]
-    ;; (seq/pr-str "(" ")" this)
-    "LazySeq")
+    (let [first (-first this)
+          rest  (-rest this)]
+      (str "("
+           (loop* [s ""
+                   f first
+                   r (seq rest)]
+                  (if r
+                    (recur (str s f " ")
+                           (-first r)
+                           (-next r))
+                    (str s f)))
+           ")")))
 
   ISeq
   (-first [this]
