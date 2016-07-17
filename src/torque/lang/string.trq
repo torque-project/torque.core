@@ -23,7 +23,7 @@
 
   IEquiv
   (-equiv [_ other]
-    (if (instance? String other)
+    (if (satisfies? IString other)
       (if (== length (-count other))
         (= data (-bytes other))
         false)

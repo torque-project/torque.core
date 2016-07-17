@@ -23,9 +23,7 @@
 
   IPrintable
   (-str [this]
-    fqn
-    ;;(str ":" fqn)
-    )
+    (str ":" fqn))
 
   INamed
   (-name [x] name)
@@ -33,20 +31,15 @@
 
   IEquiv
   (-equiv [o other]
-    ;; (print "EQUIV")
     ;; FIXME: this is currently problematic while bootstrapping
-    ;; since we have two keyword types
+    ;; since we have two keyword types. maybe this requires a
+    ;; reader conditional?
     (if (instance? Keyword other)
-      (do
-        ;; (print "KEYWORD")
-        ;; (print fqn)
-        ;; (print (. other fqn))
-        (= fqn (. other fqn)))
-      false)
-    false))
+      (= fqn (. other fqn))
+      false)))
 
-;; (defn keyword? [x]
-;;   (instance? Keyword x))
+(defn keyword? [x]
+  (instance? Keyword x))
 
-;; (defn keyword [name]
-;;   (new Keyword nil name name))
+(defn keyword [name]
+  (new Keyword nil name name))
