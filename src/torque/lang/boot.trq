@@ -8,7 +8,10 @@
   (fn* identical? [x y] (torque.core.builtin/identical? x y)))
 
 (def satisfies?
-  (fn* satisfies? [x y] (torque.core.builtin/satisfies? x y)))
+  (fn* satisfies? [x y]
+    (if (identical? y nil)
+      false
+      (torque.core.builtin/satisfies? x y))))
 
 (def +
   (fn* + [a b] (torque.core.builtin/+ a b)))

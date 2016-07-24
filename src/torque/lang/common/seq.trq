@@ -24,9 +24,9 @@
             acc 0]
       (if (satisfies? ICounted s)
         (+ acc (-count s))
-        (if s
-          (recur (-next s) (inc acc))
-          acc)))))
+        (if (nil? s)
+          acc
+          (recur (-next s) (inc acc)))))))
 
 (def reduce
   (fn* reduce
