@@ -118,22 +118,23 @@
           (recur (conj out val) (next xs)))
         out))))
 
-(defn filter
-  ([pred coll]
-   (lazy-seq
-    (when-let [s (seq coll)]
+(defn filter [pred coll]
+  (lazy-seq
+    (if-let [s (seq coll)]
       (if (chunked-seq? s)
-        (let [c (chunk-first s)
+        (let [c    (chunk-first s)
               size (count c)
-              b (chunk-buffer size)]
+              b    (chunk-buffer size)]
           (dotimes [i size]
             (when (pred (-nth c i))
               (chunk-append b (-nth c i))))
           (chunk-cons (chunk b) (filter pred (chunk-rest s))))
-        (let [f (first s) r (rest s)]
+        (let [f (first s)
+              r (rest s)]
           (if (pred f)
             (cons f (filter pred r))
-            (filter pred r))))))))
+            (filter pred r))))
+      nil)))
 
 (defn remove
   ([pred]
@@ -301,20 +302,20 @@
 
 (defn partition
   ([n coll]
-     (partition n n coll))
+    (partition n n coll))
   ([n step coll]
-     (lazy-seq
-       (when-let [s (seq coll)]
-         (let [p (take n s)]
-           (when (== n (count p))
-             (cons p (partition n step (drop step s))))))))
+    (lazy-seq
+      (when-let [s (seq coll)]
+        (let [p (take n s)]
+          (when (== n (count p))
+            (cons p (partition n step (drop step s))))))))
   ([n step pad coll]
-     (lazy-seq
-       (when-let [s (seq coll)]
-         (let [p (take n s)]
-           (if (== n (count p))
-             (cons p (partition n step pad (drop step s)))
-             (list (take n (concat p pad)))))))))
+    (lazy-seq
+      (when-let [s (seq coll)]
+        (let [p (take n s)]
+          (if (== n (count p))
+            (cons p (partition n step pad (drop step s)))
+            (list (take n (concat p pad)))))))))
 
 (defn partition-by [f coll]
   (lazy-seq

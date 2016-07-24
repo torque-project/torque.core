@@ -31,6 +31,7 @@
     [torque.lang.multimethod]
     ;; [torque.lang.binary]
     ;; [torque.lang.resource]
+    ;; [torque.lang.debug]
     ))
 
 ;; (defn println [& args]

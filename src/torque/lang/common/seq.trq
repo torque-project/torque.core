@@ -39,17 +39,19 @@
      (loop* [val init
              xs  (seq coll)]
        (if xs
-         (let* [nval (f val (-first xs))]
-           (recur nval (-next xs)))
+         (let* [nval (f val (-first xs))
+                nxt  (-next xs)]
+           (recur nval nxt))
          val)))))
 
 (def pr-str
   (fn* pr-str [begin end coll]
-    (if (not (seq coll))
-      (str begin end)
-      (str begin
-           (reduce
-            (fn* [s x]
-              (str s " " x))
-            coll)
-           end))))
+    (let* [s (seq coll)]
+      (if (nil? s)
+        (str begin end)
+        (str begin
+             (reduce
+               (fn* [s x]
+                 (str s " " x))
+               s)
+             end)))))

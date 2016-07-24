@@ -67,6 +67,28 @@
           false)
         false))))
 
+
+(def nil?
+  (fn* nil? [x] (identical? x nil)))
+
+(def true?
+  (fn* true? [x] (identical? x true)))
+
+(def false?
+  (fn* false? [x] (identical? x false)))
+
+(def zero?
+  (fn* zero? [x] (torque.core.builtin/== x 0)))
+
+(def pos?
+  (fn* pos? [x] (> x 0)))
+
+(def neg?
+  (fn* neg? [x] (< x 0)))
+
+(def not
+  (fn* not [x] (if x false true)))
+
 (def integer?
   (fn* integer? [x]
     (if x
@@ -92,7 +114,10 @@
   (fn* type [x] (torque.core.builtin/type x)))
 
 (def instance?
-  (fn* instance? [t x] (identical? (type x) t)))
+  (fn* instance? [t x]
+    (if (nil? x)
+      false
+      (identical? (type x) t))))
 
 (def make-binary
   (fn* make-binary [n] (torque.core.builtin/make-binary n)))
@@ -229,27 +254,6 @@
 ;; (def type?
 ;;   (fn* type? [x]
 ;;     (torque.core.builtin/type? x)))
-
-(def nil?
-  (fn* nil? [x] (identical? x nil)))
-
-(def true?
-  (fn* true? [x] (identical? x true)))
-
-(def false?
-  (fn* false? [x] (identical? x false)))
-
-(def zero?
-  (fn* zero? [x] (torque.core.builtin/== x 0)))
-
-(def pos?
-  (fn* pos? [x] (> x 0)))
-
-(def neg?
-  (fn* neg? [x] (< x 0)))
-
-(def not
-  (fn* not [x] (if x false true)))
 
 (def seq
   (fn* seq [x]
