@@ -79,6 +79,37 @@
   [name dispatch-fn methods default-dispatch-val
    hierarchy prefer-table]
 
+  IPrintable
+  (-str [_]
+    (str "#<MultiFn: " name ">"))
+
+  IMultiFn
+
+  (-reset [mf]
+    (reset! methods {}))
+
+  (-add-method [mf dispatch-val method]
+    (swap! methods assoc dispatch-val method)
+    mf)
+
+  (-remove-method [mf dispatch-val]
+    (swap! methods dissoc dispatch-val)
+    mf)
+
+  (-prefer-method [mf dispatch-val dispatch-val-y]
+    mf)
+
+  (-get-method [mf dispatch-val]
+    (or (get @methods dispatch-val)
+        (find-best-method mf dispatch-val)
+        (get @methods default-dispatch-val)))
+
+  (-methods [mf]
+    @methods)
+
+  (-prefers [mf]
+    @prefer-table)
+
   IFn
   (-invoke [this]
     (let [dispatch-val (dispatch-fn)
@@ -122,36 +153,7 @@
   ;;     (when-not target-fn
   ;;       (throw-no-method name dispatch-val))
   ;;     (target-fn a b c d e f)))
-  IPrintable
-  (-str [_]
-    (str "#<MultiFn: " name ">"))
-
-  IMultiFn
-
-  (-reset [mf]
-    (reset! methods {}))
-
-  (-add-method [mf dispatch-val method]
-    (swap! methods assoc dispatch-val method)
-    mf)
-
-  (-remove-method [mf dispatch-val]
-    (swap! methods dissoc dispatch-val)
-    mf)
-
-  (-prefer-method [mf dispatch-val dispatch-val-y]
-    mf)
-
-  (-get-method [mf dispatch-val]
-    (or (get @methods dispatch-val)
-        (find-best-method mf dispatch-val)
-        (get @methods default-dispatch-val)))
-
-  (-methods [mf]
-    @methods)
-
-  (-prefers [mf]
-    @prefer-table))
+  )
 
 (defmacro defmulti [name dispatch-fn & options]
   (let [options (apply array-map (array-seq options))
