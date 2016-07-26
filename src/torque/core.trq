@@ -34,5 +34,5 @@
     ;; [torque.lang.debug]
     ))
 
-;; (defn println [& args]
-;;   (print (apply str (interpose " " args))))
+(defn println [& args]
+  (print (apply str (interpose " " (array-seq args)))))

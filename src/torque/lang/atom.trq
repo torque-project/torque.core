@@ -22,9 +22,7 @@
 
   IPrintable
   (-str [_]
-    "Atom"
-    ;; (str "#<Atom " (-str state) ">")
-    )
+    (str "#<Atom " (str state) ">"))
 
   IEquiv
   (-equiv [o other] (identical? o other))
@@ -65,5 +63,5 @@
 
 (defn swap! [a f & more]
   (if (instance? Atom a)
-    (reset! a (apply f (. a state) more))
+    (reset! a (apply f (. a state) (array-seq more)))
     (-swap! a f more)))
