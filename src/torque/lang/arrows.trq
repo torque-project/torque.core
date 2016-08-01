@@ -15,7 +15,8 @@
     [torque.lang.def :refer :all]
     [torque.lang.list :refer :all]
     [torque.lang.seq :refer :all]
-    [torque.lang.predicates :refer :all]))
+    [torque.lang.predicates :refer :all]
+    [torque.lang.algo :refer :all]))
 
 (defmacro -> [x & forms]
   (loop [cur x

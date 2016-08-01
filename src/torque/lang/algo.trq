@@ -17,6 +17,7 @@
     [torque.lang.flow :refer :all]
     [torque.lang.let :refer :all]
     [torque.lang.def :refer :all]
+    [torque.lang.atom :refer :all]
     [torque.lang.lazy :refer :all]
     [torque.lang.seq :refer :all]
     [torque.lang.indexed :refer :all]
@@ -463,6 +464,16 @@
                res
                x))
       res)))
+
+(def ^:private gensym-counter (atom 0))
+
+(defn gensym
+  ([]
+   (gensym "__SYM__"))
+  ([prefix-string]
+   (let [id  (swap! gensym-counter inc)
+         fqn (str prefix-string id)]
+     (symbol fqn))))
 
 ;; (defmacro doto
 ;;   (fn doto [x & forms]

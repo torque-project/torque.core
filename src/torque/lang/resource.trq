@@ -3,13 +3,13 @@
     [torque.lang.protocols :refer :all]
     [torque.lang.exceptions :refer :all]))
 
-(defmacro with-resource [binding & body]
-  (let [sym (nth binding 0)]
-    `(try
-       (let [~sym ~(nth binding 1)
-             out  (do ~@body)]
-         (-dispose ~sym)
-         out)
-       (catch e
-         (-dispose ~sym)
-         (throw e)))))
+;; (defmacro with-resource [binding & body]
+;;   (let [sym (nth binding 0)]
+;;     `(try
+;;        (let [~sym ~(nth binding 1)
+;;              out  (do ~@body)]
+;;          (-dispose ~sym)
+;;          out)
+;;        (catch e
+;;          (-dispose ~sym)
+;;          (throw e)))))

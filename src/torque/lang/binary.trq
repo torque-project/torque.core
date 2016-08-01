@@ -1,10 +1,10 @@
 (ns torque.lang.binary
   (:require
+    [torque.lang.binary.util :refer :all]
     [torque.lang.binary.le :as le]
     [torque.lang.binary.be :as be]
-    [torque.ffi :as ffi])
-  (:use
-    [torque.lang.binary.util]))
+    [torque.lang.algo :refer :all]
+    [torque.lang.ffi :as ffi]))
 
 (def ^:private libc (ffi/so "c"))
 
@@ -19,30 +19,6 @@
 
 ;;   IPointerTarget
 ;;   (-intptr [this] data))
-
-;; (defn make-binary [size]
-;;   (if (pos? size)
-;;     (let [b (new Binary size nil :tail size)]
-;;       (set! b data (tail-of b))
-;;       b)
-;;     (throw
-;;       (ex-info "size should be positive"
-;;         {:size size}))))
-
-;; (defn from-ptr
-;;   "Create a binary from a pointer argument.
-;;    The size of the binary is supplied as the second argument.
-;;    Since there are no check to verify the size argument, this makes
-;;    this call inherently unsafe to use."
-;;   [ptr size]
-;;   (if (pointer? ptr)
-;;     (when-not (== ptr 0)
-;;       (let [out (make-binary 0 nil)]
-;;         (set! out size size)
-;;         (set! out data ptr)))
-;;     (throw
-;;       (ex-info "from-ptr should be called with an intptr as first argument"
-;;         {}))))
 
 (defn get-byte [b offset]
   (bget b offset))

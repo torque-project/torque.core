@@ -45,9 +45,9 @@
 ;;   (fn* symbol? [x]
 ;;     (instance? Symbol x)))
 
-;; (def symbol
-;;   (fn* symbol [name]
-;;     (new Symbol nil nil name name)))
+(def symbol
+  (fn* symbol [name]
+    (new Symbol nil nil name name)))
 
 ;; (defn name [x]
 ;;   (if (satisfies? INamed x)
@@ -57,13 +57,3 @@
 
 ;; (defn namespace [x]
 ;;   (-namespace x))
-
-;; (def ^:private gensym-counter (atom 0))
-
-;; (defn gensym
-;;   ([]
-;;    (gensym "__SYM__"))
-;;   ([prefix-string]
-;;    (let [id  (swap! gensym-counter inc)
-;;          fqn (str prefix-string id)]
-;;      (symbol fqn))))

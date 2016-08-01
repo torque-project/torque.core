@@ -268,13 +268,13 @@
 
 (def bytes -bytes)
 
-;; (def intptr
-;;   (fn* intptr [x]
-;;     (if (nil? x)
-;;       0
-;;       (if (integer? x)
-;;         x
-;;         (-intptr x)))))
+(def intptr
+  (fn* intptr [x]
+    (if (nil? x)
+      0
+      (if (integer? x)
+        x
+        (-intptr x)))))
 
 (def with-meta
   (fn* [o meta]

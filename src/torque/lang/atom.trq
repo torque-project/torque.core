@@ -14,8 +14,11 @@
     [torque.lang.exceptions :refer :all]
     [torque.lang.def :refer :all]
     [torque.lang.flow :refer :all]
+    [torque.lang.let :refer :all]
+    [torque.lang.indexed :refer :all]
+    [torque.lang.squote :refer :all]
     [torque.lang.predicates :refer :all]
-    [torque.lang.algo :refer :all]
+    ;; [torque.lang.algo :refer :all]
     [torque.lang.string :refer :all]))
 
 (deftype Atom [state meta validator watches]

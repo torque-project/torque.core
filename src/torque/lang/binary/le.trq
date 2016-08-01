@@ -1,6 +1,6 @@
 (ns torque.lang.binary.le
-  (:use
-    [torque.lang.binary.util]))
+  (:require
+    [torque.lang.binary.util :refer :all]))
 
 ;; (defmacro unroll [b bytes]
 ;;   (loop [n   bytes
