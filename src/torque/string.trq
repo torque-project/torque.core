@@ -14,13 +14,13 @@
 (ffi/defimport strtoll libc strtoll :sint64 [:ptr ^:out :ptr :sint32])
 
 (defn whitespace? [x]
-  (== (isspace x) 1))
+  (!= (isspace x) 0))
 
 (defn alpha-numeric? [x]
-  (== (isalnum x) 1))
+  (!= (isalnum x) 0))
 
 (defn digit? [x]
-  (== (isdigit x) 1))
+  (!= (isdigit x) 0))
 
 (defn parse-int [s]
   (if (and s (or (string? s) (binary? s)))

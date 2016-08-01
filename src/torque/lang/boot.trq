@@ -81,6 +81,9 @@
 (def ==
   (fn* == [a b] (torque.core.builtin/== a b)))
 
+(def !=
+  (fn* != [a b] (torque.core.builtin/!= a b)))
+
 (def =
   (fn* = [a b]
     (if (identical? a b)
