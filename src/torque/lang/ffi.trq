@@ -1,0 +1,25 @@
+(ns torque.ffi
+  (:require
+    [torque.lang.boot :refer :all]
+    [torque.lang.def  :refer :all]
+    [torque.lang.algo :refer :all]))
+
+(defmacro so
+  ([]
+   `(so* 0))
+  ([name]
+   `(so* ~name)))
+
+(defmacro import [lib sym]
+  `(import* ~lib ~sym))
+
+(defmacro defimport [name lib sym ret args]
+  (let [syms (mapv (fn [x] (gensym "arg")) args)
+        name (with-meta name {:private true})]
+    (print syms)
+    `(let [ptr# (import ~lib ~sym)]
+       (def ~name
+         (fn ~name ~syms
+           (print "TEST")
+           (print (-str ptr#))
+           (invoke* ptr# ~ret ~args ~@syms))))))
