@@ -85,9 +85,7 @@
       (if (and (> start end) (zero? step))
         start
         nil
-        ;; FIXME: throw doesn't work yet
-        ;; (throw (ex-info "Index out of bounds" {:n n}))
-        )))
+        (throw (ex-info "Index out of bounds" {:n n})))))
   (-nth [coll n not-found]
     (if (< n (-count coll))
       (+ start (* n step))

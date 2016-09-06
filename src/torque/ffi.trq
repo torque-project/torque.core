@@ -34,7 +34,7 @@
   (when (zero? p)
     (throw (ex-info "Null pointer reference detected" {}))))
 
-(defn throw-neg-size [n]
+(defn ^:private throw-neg-size [n]
   (when (neg? n)
     (throw (ex-info "Can't copy memory with negative size" {:size n}))))
 

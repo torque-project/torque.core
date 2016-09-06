@@ -23,16 +23,14 @@
 (declare extend-root extend-tail do-assoc)
 
 (defn throw-out-of-bounds [n]
-  ;; (throw
-  ;;   (ex-info (str "Out of bounds error when associating in vector: " n)
-  ;;            {:index n}))
-  )
+  (throw
+    (ex-info (str "Out of bounds error when associating in vector: " n)
+      {:index n})))
 
 (defn throw-not-an-index [x]
-  ;; (throw
-  ;;   (ex-info (str "Vector index has to be an integer: " x)
-  ;;            {:index x}))
-  )
+  (throw
+    (ex-info (str "Vector index has to be an integer: " x)
+      {:index x})))
 
 (deftype PersistentVector [meta cnt shift root tail]
 
