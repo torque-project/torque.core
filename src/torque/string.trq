@@ -1,7 +1,8 @@
-;; -*- mode: clojure; eval: (paredit-mode 1);-*-
+;; -*- mode: clojure; -*-
 
 (ns torque.string
-  (:require [torque.ffi :as ffi]))
+  (:require
+    [torque.ffi :as ffi]))
 
 (def ^:private libc (ffi/so "c"))
 

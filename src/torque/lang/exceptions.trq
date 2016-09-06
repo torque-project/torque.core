@@ -1,14 +1,19 @@
+;; -*- mode: clojure;-*-
+
 (ns torque.lang.exceptions
   (:require
     [torque.lang.protocols :refer :all]
     [torque.lang.boot :refer :all]
-    [torque.lang.string  :refer :all]
-    [torque.lang.cons :refer :all]))
+    [torque.lang.string :refer :all]
+    [torque.lang.symbol :refer :all]
+    [torque.lang.cons :refer :all]
+    [torque.lang.list :refer :all]))
 
 (deftype ExceptionInfo [message data cause]
 
   IPrintable
-  (-str [_] message))
+  (-str [_]
+    (str message "\n  " data)))
 
 (def ex-info
   (fn* ex-info
@@ -29,22 +34,20 @@
       (. ex cause))))
 
 (def ^:macro throw
-  (fn* throw [x]
-    (torque.core.builtin/print (-intptr "THROW"))
-    ;;(list 'torque.core.builtin/throw x)
-    ))
+  (fn* ex-throw [x]
+    (list 'throw* x)))
 
-;; (def ^:macro try
-;;   (fn* [& body]
-;;     (if body
-;;       (let* [forms (loop* [xs    body
-;;                            forms '()]
-;;                      (if (-next xs)
-;;                        (recur (-next xs)
-;;                               (cons (-first xs) forms))
-;;                        [forms (-first xs)]))]
-;;         ;; TODO: do try*/catch* once it's implemented
-;;         (cons 'do (-nth forms 0))))))
+(def ^:macro try
+  (fn* [& body]
+    (if body
+      (let* [forms (loop* [xs    body
+                           forms (list)]
+                     (if (-next xs)
+                       (recur (-next xs)
+                              (cons (-first xs) forms))
+                       [forms (-first xs)]))]
+        ;; TODO: do try*/catch* once it's implemented
+        (cons 'do (-nth forms 0))))))
 
 ;; TODO: add *assert* flag
 ;; (def ^:macro assert

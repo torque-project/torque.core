@@ -30,7 +30,7 @@
     [torque.lang.hierarchy]
     [torque.lang.multimethod]
     [torque.lang.binary]
-    ;; [torque.lang.resource]
+    [torque.lang.resource]
     ;; [torque.lang.debug]
     ))
 

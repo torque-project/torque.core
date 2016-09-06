@@ -1,4 +1,6 @@
-(ns torque.ffi
+;; -*- mode: clojure;-*-
+
+(ns torque.lang.ffi
   (:require
     [torque.lang.boot :refer :all]
     [torque.lang.def  :refer :all]
@@ -16,10 +18,7 @@
 (defmacro defimport [name lib sym ret args]
   (let [syms (mapv (fn [x] (gensym "arg")) args)
         name (with-meta name {:private true})]
-    (print syms)
     `(let [ptr# (import ~lib ~sym)]
        (def ~name
          (fn ~name ~syms
-           (print "TEST")
-           (print (-str ptr#))
            (invoke* ptr# ~ret ~args ~@syms))))))

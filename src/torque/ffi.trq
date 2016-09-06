@@ -1,75 +1,71 @@
+;; -*- mode: clojure;-*-
+
 (ns torque.ffi
   (:inherit
     [torque.lang.ffi]))
 
 (def ^:dynamic *errno* 0)
-
 (def ^:private libc (so "c"))
 
 (defimport strerr libc strerror :string [:sint32])
-(defimport malloc libc malloc :ptr [:uint64])
 (defimport free libc free :void [:ptr])
-
 (defimport memcpy libc memcpy :ptr [:ptr :ptr :uint64])
 
 ;; errno codes
-;; (def ENOENT 2)
+(def ENOENT 2)
 
-;; (defn enoent? []
-;;   (== *errno* ENOENT))
+(defn enoent? []
+  (== *errno* ENOENT))
 
-;; (defn system-error? []
-;;   (> *errno* 0))
+(defn system-error? []
+  (> *errno* 0))
 
-;; (defn not-null [p]
-;;   (when-not (zero? p) p))
+(defn not-null [p]
+  (when-not (zero? p) p))
 
-;; (defn throw-system-error [m]
-;;   ;; (when (system-error?)
-;;   ;;   (throw
-;;   ;;    (->> (merge m {:type :system :errno *errno*})
-;;   ;;         (ex-info (or (strerr *errno*)
-;;   ;;                      (str "Unknown system error: " *errno*))))))
-;;   )
+(defn throw-system-error [m]
+  (when (system-error?)
+    (throw
+      (->> (merge m {:type :system :errno *errno*})
+           (ex-info (or (strerr *errno*)
+                        (str "Unknown system error: " *errno*)))))))
 
-;; (defn throw-null-pointer [p]
-;;   ;; (when (zero? p)
-;;   ;;   (throw (ex-info "Null pointer reference detected" {})))
-;;   )
+(defn throw-null-pointer [p]
+  (when (zero? p)
+    (throw (ex-info "Null pointer reference detected" {}))))
 
-;; (defn throw-neg-size [n]
-;;   ;; (if (neg? n)
-;;   ;;   (throw (ex-info "Can't copy memory with negative size" {:size n})))
-;;   )
+(defn throw-neg-size [n]
+  (when (neg? n)
+    (throw (ex-info "Can't copy memory with negative size" {:size n}))))
 
-;; (deftype MemoryResource [p]
-;;   IResource
-;;   (-dispose [this]
-;;     (when (and p (not-null p))
-;;       (free p)
-;;       (set! this p nil)))
+(deftype MemoryResource [p]
+  IResource
+  (-dispose [this]
+    (when (and p (not-null p))
+      (free p)
+      (set! this p nil)))
 
-;;   IPointerTarget
-;;   (-intptr [_]
-;;     p))
+  IPointerTarget
+  (-intptr [_]
+    p))
 
-;; (defn from-ptr
-;;   "Convert a pointer to a binary object. Ownership of the pointer is
-;;   is not affected by this (i.e. memory needs to be freed, etc.)."
-;;   [p size]
-;;   (throw-null-pointer p)
-;;   (throw-neg-size size)
-;;   (let [b (make-binary size)]
-;;     (memcpy (intptr b) p size)
-;;     b))
+(defn from-ptr
+  "Convert a pointer to a binary object. Ownership of the pointer is
+  is not affected by this (i.e. memory needs to be freed, etc.)."
+  [p size]
+  (throw-null-pointer p)
+  (throw-neg-size size)
+  (let [b (make-binary size)]
+    (memcpy (intptr b) p size)
+    b))
 
-;; (defn to-ptr
-;;   "Copy the contents of a binary to a pointer"
-;;   [p b]
-;;   (throw-null-pointer p)
-;;   (when b
-;;     (memcpy p (intptr b) (blength b)))
-;;   p)
+(defn to-ptr
+  "Copy the contents of a binary to a pointer"
+  [p b]
+  (throw-null-pointer p)
+  (when b
+    (memcpy p (intptr b) (blength b)))
+  p)
 
 ;; (defn fnptr [fn ret args]
 ;;   (torque.core.builtin/fnptr fn ret args))

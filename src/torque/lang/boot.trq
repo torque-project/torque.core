@@ -312,7 +312,8 @@
 
 (def print
   (fn* [x]
-    (torque.core.builtin/print (-intptr x))))
+    (torque.core.builtin/print (-intptr x))
+    nil))
 
 ;; (def read
 ;;   (fn* [x]

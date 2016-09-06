@@ -96,15 +96,17 @@
 ;;      (seq coll)      (recur (next coll) (dec n) not-found)
 ;;      :else           not-found)))
 
-;; (defn nth
-;;   ([coll n]
-;;    (if (satisfies? IIndexed coll)
-;;      (-nth coll n)
-;;      (linear-traversal-nth coll n)))
-;;   ([coll n not-found]
-;;    (if (satisfies? IIndexed coll)
-;;      (-nth coll n not-found)
-;;      (linear-traversal-nth coll n not-found))))
+(defn nth
+  ([coll n]
+   (if (satisfies? IIndexed coll)
+     (-nth coll n)
+     ;; (linear-traversal-nth coll n)
+     0))
+  ([coll n not-found]
+   (if (satisfies? IIndexed coll)
+     (-nth coll n not-found)
+     ;;(linear-traversal-nth coll n not-found)
+     0)))
 
 (defn conj
   ([] [])
