@@ -10,13 +10,14 @@
 (ns torque.lang.vector
   (:require
     [torque.lang.protocols :refer :all]
-    [torque.lang.boot  :refer :all]
-    [torque.lang.exceptions  :refer :all]
-    [torque.lang.flow  :refer :all]
-    [torque.lang.let  :refer :all]
-    [torque.lang.def  :refer :all]
-    [torque.lang.indexed  :refer :all]
-    [torque.lang.chunked  :refer :all]
+    [torque.lang.boot :refer :all]
+    [torque.lang.exceptions :refer :all]
+    [torque.lang.flow :refer :all]
+    [torque.lang.let :refer :all]
+    [torque.lang.def :refer :all]
+    [torque.lang.indexed :refer :all]
+    [torque.lang.seq :refer :all]
+    [torque.lang.chunked :refer :all]
     [torque.lang.common.node :refer :all]
     [torque.lang.common.seq :as seq]))
 

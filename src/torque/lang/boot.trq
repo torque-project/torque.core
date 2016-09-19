@@ -206,7 +206,8 @@
 
 (def aclone
   (fn* aclone [a]
-    (acopy (make-array a) a 0 (alength a))))
+    (let* [len (alength a)]
+      (acopy (make-array len) a 0 len))))
 
 (def ^:private io-size
   (fn* io-size [x]

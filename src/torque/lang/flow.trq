@@ -33,6 +33,7 @@
       (list 'if (-first clauses)
             (if (-next clauses)
               (-first (-next clauses))
-              (throw (ex-info "cond requires an even number of forms" {})))
+              ;; (throw (ex-info "cond requires an even number of forms" {}))
+              nil)
             (cons 'torque.lang.flow/cond
                   (-next (-next clauses)))))))

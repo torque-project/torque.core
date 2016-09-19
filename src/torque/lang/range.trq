@@ -9,9 +9,9 @@
 
 (ns torque.lang.range
   (:require
+    [torque.lang.protocols :refer :all]
     [torque.lang.boot :refer :all]
     [torque.lang.limits :refer :all]
-    [torque.lang.protocols :refer :all]
     [torque.lang.cons :refer :all]
     [torque.lang.def :refer :all]
     [torque.lang.exceptions :refer :all]
@@ -84,7 +84,6 @@
       (+ start (* n step))
       (if (and (> start end) (zero? step))
         start
-        nil
         (throw (ex-info "Index out of bounds" {:n n})))))
   (-nth [coll n not-found]
     (if (< n (-count coll))

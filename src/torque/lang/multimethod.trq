@@ -11,6 +11,7 @@
   (:require
     [torque.lang.boot :refer :all]
     [torque.lang.protocols :refer :all]
+    [torque.lang.string :refer :all]
     [torque.lang.def :refer :all]
     [torque.lang.flow :refer :all]
     [torque.lang.let :refer :all]
