@@ -32,7 +32,7 @@
 
 (def ^:macro throw
   (fn* throw [x]
-    (list 'torque.core.builtin/throw x)))
+    (list 'throw* x)))
 
 (def ^:macro try
   (fn* [& body]

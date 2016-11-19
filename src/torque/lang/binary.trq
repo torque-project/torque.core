@@ -2,7 +2,7 @@
   (:require
     [torque.lang.binary.le :as le]
     [torque.lang.binary.be :as be]
-    [torque.ffi :as ffi])
+    [torque.lang.ffi :as ffi])
   (:use
     [torque.lang.binary.util]))
 

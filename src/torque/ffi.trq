@@ -1,24 +1,8 @@
-(ns torque.ffi)
+(ns torque.ffi
+  (:inherit
+    [torque.lang.ffi]))
 
 (def ^:dynamic *errno* 0)
-
-(defmacro so
-  ([]
-   `(so* 0))
-  ([name]
-   `(so* ~name)))
-
-(defmacro import [lib sym]
-  `(import* ~lib ~sym))
-
-(defmacro defimport [name lib sym ret args]
-  (let [syms (mapv (fn [x] (gensym "arg")) args)
-        name (with-meta name {:private true})]
-    `(let [ptr# (import ~lib ~sym)]
-       (def ~name
-         (fn ~name ~syms
-           (invoke* ptr# ~ret ~args ~@syms))))))
-
 (def ^:private libc (so "c"))
 
 (defimport strerr libc strerror :string [:sint32])
