@@ -14,28 +14,6 @@
     [torque.lang.def]
     [torque.lang.atom]))
 
-(deftype Symbol [meta namespace name fqn]
-
-  IPrintable
-  (-str [_] fqn)
-
-  IWithMeta
-  (-with-meta [_ meta]
-    (new Symbol meta namespace name fqn))
-
-  IMeta
-  (-meta [_] meta)
-
-  INamed
-  (-name [_] name)
-  (-namespace [_] namespace)
-
-  IEquiv
-  (-equiv [_ other]
-    (if (instance? Symbol other)
-      (= fqn (. other fqn))
-      false)))
-
 (defn symbol? [x]
   #?(:rev     (torque.core.builtin/symbol? x)
      :default (instance? Symbol x)))

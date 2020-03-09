@@ -15,7 +15,19 @@
     [torque.lang.def]
     [torque.lang.list]
     [torque.lang.seq]
-    [torque.lang.predicates]))
+    [torque.lang.predicates]
+    [torque.lang.symbol]))
+
+(def ^:macro doto
+  (fn doto [x & forms]
+    (let [gx (gensym)]
+      `(let* [~gx ~x]
+         ~@(map (fn [f]
+                  (if (seq? f)
+                    `(~(first f) ~gx ~@(next f))
+                    `(~f ~gx)))
+                forms)
+         ~gx))))
 
 (defmacro -> [x & forms]
   (loop [cur x

@@ -3,6 +3,7 @@
     [torque.lang.protocols]
     [torque.lang.boot]
     [torque.lang.string]
+    [torque.lang.list]
     [torque.lang.cons]))
 
 (deftype ExceptionInfo [message data cause]

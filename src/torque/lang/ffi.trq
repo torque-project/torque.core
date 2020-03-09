@@ -1,8 +1,9 @@
 (ns torque.lang.ffi
   (:require
    [torque.lang.boot :refer :all]
-   [torque.lang.def  :refer :all]
-   [torque.lang.algo :refer :all]))
+   [torque.lang.def :refer :all]
+   [torque.lang.algo :refer :all]
+   [torque.lang.symbol :refer :all]))
 
 (defmacro so
   ([]

@@ -12,7 +12,8 @@
     [torque.lang.boot]
     [torque.lang.def]
     [torque.lang.map]
-    [torque.lang.predicates])
+    [torque.lang.predicates]
+    [torque.lang.algo])
   (:require
     [torque.lang.common.seq :as seq]))
 

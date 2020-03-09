@@ -23,8 +23,7 @@
     [torque.lang.vector]
     [torque.lang.map]
     [torque.lang.squote]
-    [torque.lang.predicates]
-    [torque.lang.symbol])
+    [torque.lang.predicates])
   (:require
     [torque.lang.common.seq :as seq]))
 
@@ -533,13 +532,3 @@
                x))
       res)))
 
-(def ^:macro doto
-  (fn doto [x & forms]
-    (let [gx (gensym)]
-      `(let* [~gx ~x]
-         ~@(map (fn [f]
-                  (if (seq? f)
-                    `(~(first f) ~gx ~@(next f))
-                    `(~f ~gx)))
-                forms)
-         ~gx))))

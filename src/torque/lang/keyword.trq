@@ -11,7 +11,6 @@
   (:use
     [torque.lang.protocols]
     [torque.lang.boot]
-    [torque.lang.def]
     [torque.lang.string]))
 
 (deftype Keyword [namespace name fqn]
@@ -35,9 +34,11 @@
   (-invoke [this a b]
     (if (nil? a) b (-lookup a this b))))
 
-(defn keyword? [x]
-  #?(:rev     (torque.core.builtin/keyword? x)
-     :default (instance? Keyword x)))
+(def keyword? 
+  (fn* [x]
+    #?(:rev     (torque.core.builtin/keyword? x)
+       :default (instance? Keyword x))))
 
-(defn keyword [name]
-  (new Keyword nil name name))
+(def keyword
+  (fn* [name]
+    (new Keyword nil name name)))

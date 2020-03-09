@@ -5,6 +5,9 @@
     [torque.lang.protocols]
     [torque.lang.boot]))
 
+(def libc (so* "c"))
+(def memcpy (import* libc memcpy))
+
 (deftype String [data width length]
 
   IString
@@ -16,7 +19,7 @@
   (-bytes [o] data)
 
   IPointerTarget
-  (-intptr [o] (-intptr data))
+  (-intptr [_] (-intptr data))
 
   ICounted
   (-count [_] length)
@@ -48,17 +51,45 @@
         "<unprintable>")
       "nil")))
 
+(def binary
+  (fn* [& args]
+    #?(:rev 
+       (torque.core.builtin/binary args)
+       :default 
+       (let* [size (loop* [i 0
+                          s 0]
+                    (if (< i (alength args))
+                      (if (binary? (aget args i))
+                        (recur (inc i) (+ s (blength (aget args i))))
+                        (recur (inc i) (+ s 1)))
+                      s))
+              out  (make-binary size)]
+         (loop* [i 0
+                 p 0]
+           (if (< i (alength args))
+             (let* [b (aget args i)
+                    s (blength b)]
+               (if (binary? b)
+                 (do
+                   (invoke* memcpy :ptr [:ptr :ptr :sint64]
+                     (+ (intptr out) p) (intptr b) s)
+                   (recur (inc i) (+ p s)))
+                 (do 
+                   (bset out p b)
+                   (recur (inc i) (inc s)))))))
+         out))))
+
 (def str
   (fn* [& args]
-    (if (not (nil? args))
-      (loop* [xs (-next args)
-              b  (bytes (maybe-str (-first args)))]
-        (if (not (nil? xs))
-          (let* [x        (let* [fst (-first xs)]
-                            (if (nil? fst)
-                              "nil"
-                              fst))
-                 next-bin (binary b (bytes (maybe-str x)))]
-            (recur (-next xs) next-bin))
-          (string b)))
-      "")))
+    (if (= (alength args) 0)
+      ""
+      (loop* [i 1
+              b (bytes (maybe-str (aget args 0)))]
+          (if (< i (alength args))
+            (let* [x        (let* [fst (aget args i)]
+                              (if (nil? fst)
+                                "nil"
+                                fst))
+                   next-bin (binary b (bytes (maybe-str x)))]
+              (recur (inc i) next-bin))
+            (string b))))))

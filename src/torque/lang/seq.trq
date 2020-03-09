@@ -10,7 +10,9 @@
 (ns torque.lang.seq
   (:use
     [torque.lang.protocols]
-    [torque.lang.boot]))
+    [torque.lang.boot]
+    [torque.lang.flow]
+    [torque.lang.list]))
 
 (def ^:macro or1
   (fn or1 [a b]
@@ -36,13 +38,13 @@
         (-first s)))))
 
 (defn rest [coll]
-  (when-not (nil? coll)
+  (if-not (nil? coll)
     (if (satisfies? ISeq coll)
       (-rest coll)
       (if-let [s (seq coll)]
         (-rest s)
-        ())
-      ())))
+        ()))
+    ()))
 
 (defn nthrest [coll n]
   (loop [i n xs coll]
@@ -68,7 +70,8 @@
   (next (next s)))
 
 (defn last [coll]
-  (let [n (next coll)]
-    (if-not (nil? n)
-      (recur n)
-      (first coll))))
+  (loop [x coll]
+    (let [n (next x)]
+      (if-not (nil? n)
+        (recur n)
+        (first x)))))

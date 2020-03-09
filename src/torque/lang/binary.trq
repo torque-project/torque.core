@@ -11,24 +11,6 @@
 (ffi/defimport memcpy libc memcpy :ptr [:ptr :ptr :sint64])
 (ffi/defimport bcmp libc bcmp :uint32 [:ptr :ptr :sint64])
 
-;; (deftype Binary [size data]
-
-;;   IPrintable
-;;   (-str [_]
-;;     "#<binary>")
-
-;;   IPointerTarget
-;;   (-intptr [this] data))
-
-;; (defn make-binary [size]
-;;   (if (pos? size)
-;;     (let [b (new Binary size nil :tail size)]
-;;       (set! b data (tail-of b))
-;;       b)
-;;     (throw
-;;       (ex-info "size should be positive"
-;;         {:size size}))))
-
 ;; (defn from-ptr
 ;;   "Create a binary from a pointer argument.
 ;;    The size of the binary is supplied as the second argument.

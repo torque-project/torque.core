@@ -92,6 +92,7 @@
 
   IPrintable
   (-str [this]
+    (print "PRINT ARRAY MAP")
     (seq/pr-str "{" "}" (new IndexedSeq arr 0)))
 
   ICloneable

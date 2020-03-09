@@ -5,7 +5,8 @@
     [torque.lang.protocols]
     [torque.lang.boot]
     [torque.lang.def]
-    [torque.lang.let]))
+    [torque.lang.let]
+    [torque.lang.squote]))
 
 (defn boolean [x]
   (if x true false))

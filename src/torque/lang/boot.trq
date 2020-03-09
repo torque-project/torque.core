@@ -1,8 +1,8 @@
 ;; -*- mode: clojure;-*-
 
 (ns torque.lang.boot
-  (:use
-    [torque.lang.protocols]))
+  (:require
+    [torque.lang.protocols :refer :all]))
 
 (def identical?
   (fn* identical? [x y] (torque.core.builtin/identical? x y)))
@@ -14,13 +14,16 @@
   (fn* integer? [x]
     (torque.core.builtin/integer? x)))
 
-(def fn?
-  (fn* integer? [x]
-    (torque.core.builtin/fn? x)))
-
 (def binary?
   (fn* array? [x]
     (torque.core.builtin/binary? x)))
+
+(def make-binary
+  (fn* make-binary [n] (torque.core.builtin/make-binary n)))
+
+(def fn?
+  (fn* integer? [x]
+    (torque.core.builtin/fn? x)))
 
 (def array?
   (fn* array? [x]
@@ -32,17 +35,14 @@
 (def instance?
   (fn* instance? [t x] (identical? (type x) t)))
 
-(def binary
-  (fn* binary [& vs] (torque.core.builtin/binary vs)))
-
-(def make-binary
-  (fn* make-binary [n] (torque.core.builtin/make-binary n)))
-
 (def bget
-  (fn* bget [a n] (torque.core.builtin/bget a n)))
+  (fn* bget [b n] (torque.core.builtin/bget b n)))
+
+(def bset
+  (fn* bset [b n x] (torque.core.builtin/bset b n x)))
 
 (def blength
-  (fn* [a] (torque.core.builtin/blength a)))
+  (fn* [b] (torque.core.builtin/blength b)))
 
 (def make-array
   (fn* make-array [n] (torque.core.builtin/make-array n)))
@@ -52,10 +52,6 @@
 
 (def aclone
   (fn* aclone [a] (torque.core.builtin/aclone a)))
-
-(def acopy
-  (fn* acopy [dst src off len]
-    (torque.core.builtin/acopy dst src off len)))
 
 (def aget
   (fn* aget [a n] (torque.core.builtin/aget a n)))
@@ -150,6 +146,15 @@
 (def seq
   (fn* seq [x] (if x (-seq x) nil)))
 
+(def acopy
+  (fn* acopy [dst src off len]
+    (loop* [pos 0]
+      (if (< pos len)
+        (do
+          (aset dst pos (aget src (+ off pos)))
+          (recur (inc pos)))
+        dst))))
+
 (def bytes  -bytes)
 
 (def intptr
@@ -173,6 +178,37 @@
         (-meta o)
         nil)
       nil)))
+
+; (deftype Binary [size data]
+
+;   ICounted
+;   (-count [_] size)
+
+;   IPointerTarget
+;   (-intptr [this] data))
+
+;; define symbol as early as
+(deftype Symbol [meta namespace name fqn]
+
+  IPrintable
+  (-str [_] fqn)
+
+  IWithMeta
+  (-with-meta [_ meta]
+    (new Symbol meta namespace name fqn))
+
+  IMeta
+  (-meta [_] meta)
+
+  INamed
+  (-name [_] name)
+  (-namespace [_] namespace)
+
+  IEquiv
+  (-equiv [_ other]
+    (if (instance? Symbol other)
+      (= fqn (. other fqn))
+      false)))
 
 (deftype Reduced [val]
   IDeref

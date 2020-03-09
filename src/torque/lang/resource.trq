@@ -1,7 +1,8 @@
 (ns torque.lang.resource
   (:use
     [torque.lang.protocols]
-    [torque.lang.exceptions]))
+    [torque.lang.exceptions]
+    [torque.lang.algo]))
 
 (defmacro with-resource [binding & body]
   (let [sym (nth binding 0)]

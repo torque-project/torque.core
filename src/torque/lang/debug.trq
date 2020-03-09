@@ -1,4 +1,5 @@
-(ns torque.lang.debug)
+(ns torque.lang.debug
+  (:require [torque.lang.list :refer :all]))
 
 (def ^:macro spy
   (fn* [form]

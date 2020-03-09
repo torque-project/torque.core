@@ -172,3 +172,5 @@
 (defn contains?
   [coll v]
   (not (identical? (get coll v ::lookup-sentinel) ::lookup-sentinel)))
+
+(def empty-map empty-persistent-array-map)
