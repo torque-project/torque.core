@@ -15,7 +15,7 @@
     (torque.core.builtin/integer? x)))
 
 (def binary?
-  (fn* array? [x]
+  (fn* binary? [x]
     (torque.core.builtin/binary? x)))
 
 (def make-binary
@@ -226,7 +226,7 @@
   (fn* deref [o]
     (-deref o)))
 
-;; FIXME: crutches for devleopment. remove these later
+;; FIXME: crutches for development. remove these later
 
 (def print
   (fn* [x]
