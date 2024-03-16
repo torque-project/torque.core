@@ -14,7 +14,7 @@
   (:require
     [torque.lang.common.seq :as seq]))
 
-(deftype Cons [first rest meta]
+(deftype Cons [^:ref first ^:ref rest meta]
 
   IPrintable
   (-str [this]
